@@ -15,5 +15,10 @@ class ViTTrainer(Trainer):
         learning_rate=1e-4) -> None:
         super().__init__(task_type, batch_size, num_worker, shuffle, opt, epoch, model_name, learning_rate)
     
+    def _build_dataloader(self):
+        return super()._build_dataloader()
+    
+    
+    
     
     

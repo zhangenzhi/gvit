@@ -16,7 +16,7 @@ class Trainer():
                  num_worker: int = 0,
                  shuffle: bool = True,
                  opt: str = "adam",
-                 epoch: int = '3',
+                 epoch: int = 10,
                  model_name: str = 'mlp',
                  learning_rate= 1e-4) -> None:
         
@@ -30,21 +30,34 @@ class Trainer():
         self.LR = learning_rate
         self.MODEL = model_name
         
+        self.device = self._check_device_avail()
         self.model = self._build_model()
         self.train_dataloader, self.val_dataloader = self._build_dataloader()
         self.opt = self._build_optimizer()
         self.loss_fn = self._build_loss()
     
+    def _check_device_avail(self):
+        if torch.cuda.is_available():
+            device = torch.device('cuda')
+            print(f"Devices found {torch.cuda.device_count()}.")
+        else:
+            device = torch.device('cpu')
+            print("No device found, use cpu only")
+        return device
+            
     def _build_dataloader(self):
         if self.TASK == "random":
+            self.NUM_CLASS = 10
             train_dataset = RandomDataset(size=(5000,3,32,32), num_class=10)
             val_dataset = RandomDataset(size=(1000,3,32,32), num_class=10)
         elif self.TASK == "fake_imagenet":
+            self.NUM_CLASS = 1000
             train_dataset = RandomDataset(size=(5000,3,256,256), num_class=1000)
             val_dataset = RandomDataset(size=(1000,3,256,256), num_class=1000)
         elif self.TASK == "imagenet":
+            self.NUM_CLASS = 1000
             train_transform = transforms.Compose([
-                        transforms.Resize((224,224)),
+                        transforms.Resize((256,256)),
                         transforms.ToTensor()  
                     ])
             train_dataset = torchvision.datasets.ImageNet(self.DATA_PATH, transform= train_transform)
@@ -68,10 +81,10 @@ class Trainer():
             model = VisionTransformer(
                             image_size=256,
                             patch_size=32,
-                            num_layers=3,
-                            num_heads=4,
-                            hidden_dim=128,
-                            mlp_dim=128,
+                            num_layers=12,
+                            num_heads=12,
+                            hidden_dim=3072,
+                            mlp_dim=3072,
                             num_classes=1000)
         return model
     
@@ -85,16 +98,24 @@ class Trainer():
     
     
     def train(self):
+        
+        self.model.to(self.device)
+        
         for e in range(self.EPOCH):
             correct = 0
             for (i,data) in enumerate(self.train_dataloader):
                 x,label = data[0], data[1]
+                label = torch.reshape(label,(self.BATCH_SIZE,1))
+                label = torch.zeros(self.BATCH_SIZE,self.NUM_CLASS).scatter(1,label,1)
+                x, label = x.cuda(), label.cuda()
                 y_pred = self.model(x)
                 loss = self.loss_fn(y_pred, label)
                 loss.backward()
                 self.opt.step()
                 correct += (y_pred == label).float().sum()
                 self.opt.zero_grad()
+                if i%100==0:
+                    print(f"Step {i}, train loss: {loss}.")
             accuracy = 100 * correct / len(self.train_dataloader)
             print("Epoch {}, train loss: {}, train acc: {}".format(e, loss, accuracy))
             print(f"Epoch {e}, train loss: {loss}, train acc: {accuracy}")
