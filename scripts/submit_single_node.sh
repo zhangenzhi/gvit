@@ -10,6 +10,7 @@
 #export PATH=$PWD/conda/bin:$PATH
 #eval "$($PWD/conda/bin/conda shell.bash hook)"
 set +x
+source ~/miniconda_frontier/etc/profile.d/conda.sh
 conda activate /ccs/home/enzhi/miniconda_frontier/envs/pth
 
 export LD_PRELOAD="/usr/lib64/libcrypto.so /usr/lib64/libssh.so.4 /usr/lib64/libssl.so.1.1"
