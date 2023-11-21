@@ -1,5 +1,4 @@
 #!/bin/bash
-# Begin LSF directives
 #SBATCH -A gen006
 #SBATCH -J Imagenet-ViT
 #SBATCH -o Imagenet-ViT.o%J
