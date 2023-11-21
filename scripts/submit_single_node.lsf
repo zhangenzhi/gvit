@@ -2,7 +2,7 @@
 # Begin LSF directives
 #SBATCH -A gen006
 #SBATCH -J Imagenet-ViT
-#SBATCH -o Long-Short-Sequence-transformer.o%J
+#SBATCH -o Imagenet-ViT.o%J
 #SBATCH -t 02:00:00
 #SBATCH -N 1
 #SBATCH -p batch
