@@ -42,7 +42,7 @@ def demo_basic():
     # print(ddp_model.parameters())
     optimizer = optim.SGD(ddp_model.parameters(), lr=1e-4)
 
-    BATCH_SIZE=48
+    BATCH_SIZE=40
     for i in range(100):
         optimizer.zero_grad()
         outputs = ddp_model(torch.randn(BATCH_SIZE, 3, 224, 224))
