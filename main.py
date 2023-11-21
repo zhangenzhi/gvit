@@ -3,9 +3,9 @@ import torch.distributed as dist
 import torch.nn as nn
 import torch.optim as optim
 import os
-from model.vision_transformer import VisionTransformer
+# from model.vision_transformer import VisionTransformer
 from torch.nn.parallel import DistributedDataParallel as DDP
-
+from torchvision.models import VisionTransformer
 # os.environ['MASTER_ADDR'] = str(os.environ['HOSTNAME'])
 # os.environ['MASTER_PORT'] = "29500"
 # os.environ['WORLD_SIZE'] = os.environ['SLURM_NTASKS']
