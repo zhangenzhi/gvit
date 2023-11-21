@@ -26,8 +26,8 @@ def demo_basic():
 
     # create model and move it to GPU with id rank
     model = VisionTransformer(
-                image_size=224,
-                patch_size=14,
+                image_size=256,
+                patch_size=32,
                 num_layers=12,
                 num_heads=12,
                 hidden_dim=3072,
