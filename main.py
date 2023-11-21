@@ -45,7 +45,7 @@ def demo_basic():
     BATCH_SIZE=4
     for i in range(1000):
         optimizer.zero_grad()
-        outputs = ddp_model(torch.randn(BATCH_SIZE, 3, 224, 224))
+        outputs = ddp_model(torch.randn(BATCH_SIZE, 3, 256, 256))
         labels = torch.zeros(BATCH_SIZE,1000).scatter(1,torch.randint(1,1000,(BATCH_SIZE,1)),1).to(device_id)
         loss_fn(outputs, labels).backward()
         optimizer.step()
