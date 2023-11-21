@@ -26,11 +26,11 @@ def demo_basic():
 
     # create model and move it to GPU with id rank
     model = VisionTransformer(
-                image_size=256,
-                patch_size=32,
+                image_size=224,
+                patch_size=14,
                 num_layers=12,
                 num_heads=12,
-                hidden_dim=3072,
+                hidden_dim=768,
                 mlp_dim=3072,
                 num_classes=1000)
     
@@ -45,7 +45,7 @@ def demo_basic():
     BATCH_SIZE=4
     for i in range(1000):
         optimizer.zero_grad()
-        outputs = ddp_model(torch.randn(BATCH_SIZE, 3, 256, 256))
+        outputs = ddp_model(torch.randn(BATCH_SIZE, 3, 224, 224))
         labels = torch.zeros(BATCH_SIZE,1000).scatter(1,torch.randint(1,1000,(BATCH_SIZE,1)),1).to(device_id)
         loss_fn(outputs, labels).backward()
         optimizer.step()
