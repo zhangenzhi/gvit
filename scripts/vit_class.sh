@@ -10,3 +10,7 @@ export BATCH_DDP=1
 
 
 torchrun --nnodes=1 --nproc_per_node=8 main.py
+=======
+export VALUE=8
+
+OMP_NUM_THREADS=$VALUE torchrun --nnodes=1 --nproc_per_node=8  ./main.py

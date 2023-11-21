@@ -77,7 +77,7 @@ class EncoderBlock(torch.nn.Module):
                                                           batch_first=True)
         self.dropout = torch.nn.Dropout(dropout)
         
-        # mlp block
+        # mlp block # no grad?
         self.ln_2 = norm_layer(hidden_dim)
         self.mlp = MLPBlock(hidden_dim, mlp_dim, dropout)
         
@@ -95,7 +95,9 @@ class EncoderBlock(torch.nn.Module):
         y = self.ln_2(x)
         y = self.mlp(x)
         
-        return x+y
+        z = x+y
+        
+        return z
         
 class Encoder(torch.nn.Module):
     def __init__(
