@@ -40,10 +40,10 @@ def demo_basic():
     ddp_model = DDP(model, device_ids=[device_id], output_device=device_id)
     loss_fn = nn.CrossEntropyLoss()
     # print(ddp_model.parameters())
-    optimizer = optim.SGD(ddp_model.parameters(), lr=0.001)
+    optimizer = optim.SGD(ddp_model.parameters(), lr=1e-4)
 
-    BATCH_SIZE=4
-    for i in range(1000):
+    BATCH_SIZE=8
+    for i in range(100):
         optimizer.zero_grad()
         outputs = ddp_model(torch.randn(BATCH_SIZE, 3, 224, 224))
         labels = torch.zeros(BATCH_SIZE,1000).scatter(1,torch.randint(1,1000,(BATCH_SIZE,1)),1).to(device_id)
