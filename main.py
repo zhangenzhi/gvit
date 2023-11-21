@@ -36,8 +36,8 @@ def demo_basic():
     
     device_id = rank % torch.cuda.device_count()
     model = model.to(device_id)
-    # ddp_model = DDP(model, device_ids=[device_id], output_device=device_id, find_unused_parameters=True)
-    ddp_model = DDP(model, device_ids=[device_id], output_device=device_id)
+    ddp_model = DDP(model, device_ids=[device_id], output_device=device_id, find_unused_parameters=True)
+    # ddp_model = DDP(model, device_ids=[device_id], output_device=device_id)
     loss_fn = nn.CrossEntropyLoss()
     # print(ddp_model.parameters())
     optimizer = optim.SGD(ddp_model.parameters(), lr=0.001)
