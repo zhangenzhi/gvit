@@ -3,6 +3,7 @@ import torch.distributed as dist
 import torch.nn as nn
 import torch.optim as optim
 import os
+from model.vision_transformer import VisionTransformer
 from torch.nn.parallel import DistributedDataParallel as DDP
 
 os.environ['MASTER_ADDR'] = str(os.environ['HOSTNAME'])
@@ -13,8 +14,6 @@ os.environ['RANK'] = os.environ['SLURM_PROCID']
 world_size = int(os.environ['SLURM_NTASKS'])
 world_rank = int(os.environ['SLURM_PROCID'])
 local_rank = int(os.environ['SLURM_LOCALID'])
-from model.vision_transformer import VisionTransformer
-from torch.nn.parallel import DistributedDataParallel as DDP
 
 
 
@@ -37,7 +36,7 @@ def demo_basic():
     model = model.to(device_id)
     ddp_model = DDP(model, device_ids=[device_id], output_device=device_id, find_unused_parameters=True)
 
-    loss_fn = nn.MSELoss()
+    loss_fn = nn.CrossEntropyLoss()
     # print(ddp_model.parameters())
     optimizer = optim.SGD(ddp_model.parameters(), lr=0.001)
 

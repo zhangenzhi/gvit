@@ -22,7 +22,7 @@ module load rocm/5.4.0
 #nodes=($(cat ${LSB_DJOB_HOSTFILE} | sort | uniq | grep -v login | grep -v batch))
 #nnodes=${#nodes[@]}
 
-srun python -u test.py
+srun python -u test_frontier.py
 
 # srun -n 4 --ntasks-per-node=4 -c 7 python -u cls_train.py
 
