@@ -3,10 +3,12 @@ import torchvision
 from torchvision import transforms
 
 
+print(torch.cuda.get_device_name())
+
 datapath = "/lustre/orion/gen006/proj-shared/enzhi/"
 
 train_transform = transforms.Compose([
-        transforms.Resize((224,224)),
+        transforms.Resize((256,256)),
         transforms.ToTensor()  
     ])
 
