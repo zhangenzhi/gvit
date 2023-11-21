@@ -6,16 +6,18 @@ import os
 from model.vision_transformer import VisionTransformer
 from torch.nn.parallel import DistributedDataParallel as DDP
 
-os.environ['MASTER_ADDR'] = str(os.environ['HOSTNAME'])
-os.environ['MASTER_PORT'] = "29500"
-os.environ['WORLD_SIZE'] = os.environ['SLURM_NTASKS']
-os.environ['RANK'] = os.environ['SLURM_PROCID']
+# os.environ['MASTER_ADDR'] = str(os.environ['HOSTNAME'])
+# os.environ['MASTER_PORT'] = "29500"
+# os.environ['WORLD_SIZE'] = os.environ['SLURM_NTASKS']
+# os.environ['RANK'] = os.environ['SLURM_PROCID']
 
-world_size = int(os.environ['SLURM_NTASKS'])
-world_rank = int(os.environ['SLURM_PROCID'])
-local_rank = int(os.environ['SLURM_LOCALID'])
+# world_size = int(os.environ['SLURM_NTASKS'])
+# world_rank = int(os.environ['SLURM_PROCID'])
+# local_rank = int(os.environ['SLURM_LOCALID'])
 
 
+os.environ['MASTER_ADDR'] = 'localhost'
+os.environ['MASTER_PORT'] = '29500'
 
 def demo_basic():
     dist.init_process_group("nccl")
