@@ -19,8 +19,8 @@ module load gcc/11.2.0
 module load rocm/5.4.0
 
 # grab nodecount
-#nodes=($(cat ${LSB_DJOB_HOSTFILE} | sort | uniq | grep -v login | grep -v batch))
-#nnodes=${#nodes[@]}
+nodes=($(cat ${LSB_DJOB_HOSTFILE} | sort | uniq | grep -v login | grep -v batch))
+nnodes=${#nodes[@]}
 
 srun python -u test_frontier.py
 
