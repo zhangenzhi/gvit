@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -A gen006
+#SBATCH -A bif146
 #SBATCH -J Imagenet-ViT
 #SBATCH -o Imagenet-ViT.o%J
 #SBATCH -t 02:00:00
