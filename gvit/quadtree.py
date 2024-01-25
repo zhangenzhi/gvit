@@ -27,10 +27,10 @@ class Rect:
     def get_size(self):
         return self.x2-self.x1, self.y2-self.y1
     
-    def draw(self, ax, c='grey', lw=1, **kwargs):
+    def draw(self, ax, c='grey', lw=0.5, **kwargs):
         # Create a Rectangle patch
         import matplotlib.patches as patches
-        rect = patches.Rectangle((self.x1, self.y1), width=self.x2-self.x1, height=self.y2-self.y1, linewidth=lw, edgecolor=c, facecolor='none')
+        rect = patches.Rectangle((self.x1, self.y1), width=self.x2-self.x1, height=self.y2-self.y1, linewidth=lw, edgecolor='w', facecolor='none')
         ax.add_patch(rect)
     
     
