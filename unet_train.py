@@ -69,6 +69,7 @@ class DiceLoss(nn.Module):
         self.smooth = smooth
 
     def forward(self, predicted, target):
+        pred = torch.sigmoid(pred)
         intersection = torch.sum(predicted * target)
         union = torch.sum(predicted) + torch.sum(target) + self.smooth
         dice_coefficient = (2 * intersection + self.smooth) / union
