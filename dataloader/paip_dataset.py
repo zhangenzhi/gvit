@@ -1,4 +1,5 @@
 import os
+import numpy as np
 from PIL import Image, ImageFile
 import torch
 from torch.utils.data import Dataset, DataLoader
@@ -8,7 +9,7 @@ from torchvision import transforms
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 class PAIPDataset(Dataset):
-    def __init__(self, data_path, resolution):
+    def __init__(self, data_path, resolution, normalize=True):
         self.data_path = data_path
         self.resolution = resolution
 
@@ -27,9 +28,40 @@ class PAIPDataset(Dataset):
                     self.image_filenames.extend([image])
                     self.mask_filenames.extend([mask])
 
-        self.transform = transforms.Compose([
+        # Compute mean and std from the dataset (you need to implement this)
+        self.mean, self.std = self.compute_dataset_statistics()
+
+        self.transform= transforms.Compose([
             transforms.ToTensor(),
         ])
+        
+        self.transform_mask= transforms.Compose([
+            transforms.ToTensor(),
+        ])
+
+        if normalize:
+            self.transform.transforms.append(transforms.Normalize(mean=self.mean, std=self.std))
+    
+    def compute_dataset_statistics(self):
+        # Initialize accumulators for mean and std
+        mean_acc = np.zeros(3)
+        std_acc = np.zeros(3)
+
+        # Loop through the dataset and accumulate channel-wise mean and std
+        for img_name in self.image_filenames:
+            img = Image.open(img_name).convert("RGB")
+            img_np = np.array(img) / 255.0  # Normalize pixel values to [0, 1]
+            
+            # Accumulate mean and std separately for each channel
+            mean_acc += np.mean(img_np, axis=(0, 1))
+            std_acc += np.std(img_np, axis=(0, 1))
+
+        # Calculate the overall mean and std
+        mean = mean_acc / len(self.image_filenames)
+        std = std_acc / len(self.image_filenames)
+
+        return mean.tolist(), std.tolist()
+
 
     def __len__(self):
         return len(self.image_filenames)
@@ -43,7 +75,7 @@ class PAIPDataset(Dataset):
 
         # Apply transformations
         image = self.transform(image)
-        mask = self.transform(mask)
+        mask = self.transform_mask(mask)
 
         return image, mask
 

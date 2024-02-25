@@ -39,6 +39,8 @@ def xml2contour(fn, shape, div=None):
   e = e.findall('Annotation')
   # assert(len(e) == 2), len(e)
   for ann in e:
+    if ann.get('Name')=='nontumor':
+      continue
     board = np.zeros(shape[:2], dtype=np.uint8)
     id_num = int(ann.get('Id'))
     assert(id_num == 1 or id_num == 2)
@@ -309,6 +311,7 @@ def glob_tif_files(directory_path):
 def parse_all_file(directory_path='./dataset/paip'):
   import pathlib
   mask_path = directory_path+"/mask/"
+  os.makedirs(mask_path, exist_ok=True)
   result_list = glob_and_combine(directory_path)
   mask_files = glob_tif_files(mask_path)
 
@@ -336,7 +339,7 @@ def parse_all_file(directory_path='./dataset/paip'):
 
       mask = xml2mask(xml_fn, src_shape)
       for (k,v) in mask.items():
-        mask[k] = v * (k*128-1) 
+        mask[k] = v*255
       
       print('saving mask img..')
       dst_path = os.path.join(mask_path, dst_fn)
@@ -351,4 +354,4 @@ if __name__ == '__main__':
   parser.add_argument('--dst_fn', help='save tif filename')
   args = parser.parse_args()
 
-  parse_all_file("/Volumes/dataset/paip")
+  parse_all_file("/Volumes/data/dataset/paip")

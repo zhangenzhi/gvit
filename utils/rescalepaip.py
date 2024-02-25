@@ -37,10 +37,11 @@ if __name__ == "__main__":
     # Input directory paths
     image_directory = "/Volumes/data/dataset/paip/"
     mask_directory = "/Volumes/data/dataset/paip/mask"
-    output_directory = "output_images_and_masks/"
+    output_directory = "/Volumes/data/dataset/paip/output_images_and_masks/"
+    os.makedirs(output_directory, exist_ok=True)
     processed_slides = os.listdir(output_directory)
     # Target sizes for rescaling
-    target_sizes = [(8192, 8192), (4096, 4096), (1024, 1024), (512, 512)]
+    target_sizes = [(1024, 1024), (512, 512)]
 
     # Zoom level for rescaling
     zoom_level = 0  # Adjust the zoom level as needed
@@ -62,7 +63,7 @@ if __name__ == "__main__":
         print(f"Mask: {mask_path}")
 
         # Output directory for each pair
-        output_directory = f"output_images_and_masks/{os.path.basename(image_path)[:-4]}"
+        output_directory = f"/Volumes/data/dataset/paip/output_images_and_masks/{os.path.basename(image_path)[:-4]}"
 
         for size in target_sizes:
             print(f"Rescaling to {size[0]}x{size[1]} at zoom level {zoom_level}")
