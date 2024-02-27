@@ -29,7 +29,8 @@ class PAIPDataset(Dataset):
                     self.mask_filenames.extend([mask])
 
         # Compute mean and std from the dataset (you need to implement this)
-        self.mean, self.std = self.compute_dataset_statistics()
+        self.mean, self.std = self.compute_img_statistics()
+        self.mask_m, self.mask_std = self.compute_mask_statistics()
 
         self.transform= transforms.Compose([
             transforms.ToTensor(),
@@ -41,8 +42,10 @@ class PAIPDataset(Dataset):
 
         if normalize:
             self.transform.transforms.append(transforms.Normalize(mean=self.mean, std=self.std))
+            # self.transform_mask.transforms.append(transforms.Normalize(mean=self.mask_m, std=self.mask_std))
     
-    def compute_dataset_statistics(self):
+    
+    def compute_img_statistics(self):
         # Initialize accumulators for mean and std
         mean_acc = np.zeros(3)
         std_acc = np.zeros(3)
@@ -61,7 +64,26 @@ class PAIPDataset(Dataset):
         std = std_acc / len(self.image_filenames)
 
         return mean.tolist(), std.tolist()
+    
+    def compute_mask_statistics(self):
+        # Initialize accumulators for mean and std
+        mean_acc = np.zeros(1)
+        std_acc = np.zeros(1)
 
+        # Loop through the dataset and accumulate channel-wise mean and std
+        for img_name in self.mask_filenames:
+            img = Image.open(img_name).convert("L")
+            img_np = np.array(img) / 255.0  # Normalize pixel values to [0, 1]
+            
+            # Accumulate mean and std separately for each channel
+            mean_acc += np.mean(img_np, axis=(0, 1))
+            std_acc += np.std(img_np, axis=(0, 1))
+
+        # Calculate the overall mean and std
+        mean = mean_acc / len(self.mask_filenames)
+        std = std_acc / len(self.mask_filenames)
+
+        return mean.tolist(), std.tolist()
 
     def __len__(self):
         return len(self.image_filenames)

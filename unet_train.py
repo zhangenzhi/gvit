@@ -81,14 +81,17 @@ class DiceLoss(nn.Module):
     
 def main():
     # Create an instance of the U-Net model and other necessary components
-    unet_model = Unet(n_class=2)
+    unet_model = Unet(n_class=1)
     criterion = DiceLoss()
     optimizer = optim.Adam(unet_model.parameters(), lr=0.001)
-
+    device = torch.device("cuda" if torch.cuda.is_available() else "mps")
+    # Move the model to GPU
+    unet_model.to(device)
+    
     # Split the dataset into train, validation, and test sets
     data_path = "/Volumes/data/dataset/paip/output_images_and_masks"
     resolution = 512
-    batch_size = 8
+    batch_size = 16
     dataset = PAIPDataset(data_path, resolution)
     dataset_size = len(dataset)
     train_size = int(0.7 * dataset_size)
@@ -102,7 +105,7 @@ def main():
     test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False)
 
     # Training loop
-    num_epochs = 30
+    num_epochs = 200
     train_losses = []
     val_losses = []
     output_dir = "./visualizations"  # Change this to the desired directory
@@ -114,6 +117,7 @@ def main():
 
         for batch in train_loader:
             images, masks = batch
+            images, masks = images.to(device), masks.to(device)  # Move data to GPU
             optimizer.zero_grad()
 
             outputs = unet_model(images)
@@ -133,6 +137,7 @@ def main():
         with torch.no_grad():
             for batch in val_loader:
                 images, masks = batch
+                images, masks = images.to(device), masks.to(device)  # Move data to GPU
                 outputs = unet_model(images)
                 loss = criterion(outputs, masks)
                 epoch_val_loss += loss.item()
@@ -147,12 +152,13 @@ def main():
             unet_model.eval()
             with torch.no_grad():
                 sample_images, sample_masks = next(iter(val_loader))
+                sample_images, sample_masks = sample_images.to(device), sample_masks.to(device)  # Move data to GPU
                 sample_outputs = torch.sigmoid(unet_model(sample_images))
 
                 for i in range(sample_images.size(0)):
-                    image = sample_images[i].permute(1, 2, 0).numpy()
-                    mask_true = sample_masks[i].numpy()
-                    mask_pred = (sample_outputs[i, 0] > 0.5).numpy()
+                    image = sample_images[i].cpu().permute(1, 2, 0).numpy()
+                    mask_true = sample_masks[i].cpu().numpy()
+                    mask_pred = (sample_outputs[i, 0].cpu() > 0.5).numpy()
                     
                     # Squeeze the singleton dimension from mask_true
                     mask_true = np.squeeze(mask_true, axis=0)
@@ -187,6 +193,7 @@ def main():
     with torch.no_grad():
         for batch in test_loader:
             images, masks = batch
+            images, masks = images.to(device), masks.to(device)  # Move data to GPU
             outputs = unet_model(images)
             loss = criterion(outputs, masks)
             test_loss += loss.item()

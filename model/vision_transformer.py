@@ -4,8 +4,8 @@ from collections import OrderedDict
 from functools import partial
 from typing import Any, Callable, Dict, List, NamedTuple, Optional
 
-from model.mlp_block import MLP
-from model.conv_block import Conv2dNormActivation
+from mlp_block import MLP
+from conv_block import Conv2dNormActivation
 
 import torch
 import torch.nn.functional as F
