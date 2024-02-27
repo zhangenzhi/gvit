@@ -68,7 +68,7 @@ def custom_partcher(datapath="./dataset/exp", to_size: tuple=(8,8,3)):
         name = Path(p).parts[-2]
         cv.imwrite(save_to+"/{}_{}.jpeg".format(i, name), seq_img)
         
-def imagenet_partcher(datapath="./dataset", to_size: tuple=(8,8,3)):
+def imagenet_patcher(datapath="./dataset", to_size: tuple=(8,8,3)):
     train_path = os.path.join(datapath, "train")
     val_path = os.path.join(datapath, "val")
     save_to =os.path.join(datapath, "imagenet_qdt")
@@ -78,13 +78,13 @@ def imagenet_partcher(datapath="./dataset", to_size: tuple=(8,8,3)):
 def patchify(args):
     datapath = args.path
     if args.dataset == "imagenet":
-        imagenet_partcher(datapath=datapath)
+        imagenet_patcher(datapath=datapath)
     elif args.dataset == "piap":
         pass
     elif args.dataset == "btcv":
         pass
     else:
-        custom_patchify()
+        pass
 
 if __name__ == '__main__':
     args = parser.parse_args()

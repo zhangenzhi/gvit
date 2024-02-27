@@ -8,6 +8,9 @@
 # export MASTER_PORT=29500 # default from torch launcher
 # export BATCH_DDP=1
 
+module load PrgEnv-gnu
+module load gcc/11.2.0
+module load rocm/5.4.0
 
 export VALUE=1
 
