@@ -11,9 +11,9 @@ conda activate /ccs/home/enzhi/miniconda_frontier/envs/gvit
 
 export LD_PRELOAD="/usr/lib64/libcrypto.so /usr/lib64/libssh.so.4 /usr/lib64/libssl.so.1.1"
 
-module load PrgEnv-gnu
-module load gcc/11.2.0
-module load rocm/5.4.0
+# module load PrgEnv-gnu
+module load gcc/12.2.0
+module load rocm/5.3.0
 
 # grab nodecount
 nodes=($(cat ${LSB_DJOB_HOSTFILE} | sort | uniq | grep -v login | grep -v batch))
