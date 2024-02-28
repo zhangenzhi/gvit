@@ -20,4 +20,7 @@ nodes=($(cat ${LSB_DJOB_HOSTFILE} | sort | uniq | grep -v login | grep -v batch)
 nnodes=${#nodes[@]}
 
 # exec
-python3 transunet_train.py
+python3 transunet_train.py \
+        --datapath=./dataset/paip/output_images_and_masks \
+        --resolution=512 \
+        --savefile=./transunet_visual transunet_train.py

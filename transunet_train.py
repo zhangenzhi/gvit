@@ -27,7 +27,7 @@ class DiceLoss(nn.Module):
         loss = 1.0 - dice_coefficient  # Adjusted to ensure non-negative loss
         return loss
 
-def main():
+def main(datapath, resolution):
     # Create an instance of the U-Net model and other necessary components
     num_classes = 1
     unet_model = TransUNet(img_dim=512,
@@ -45,8 +45,8 @@ def main():
     optimizer = optim.Adam(unet_model.parameters(), lr=0.001)
 
     # Split the dataset into train, validation, and test sets
-    data_path = "/Volumes/data/dataset/paip/output_images_and_masks"
-    resolution = 512
+    data_path = datapath
+    resolution = resolution
 
     dataset = PAIPDataset(data_path, resolution)
     dataset_size = len(dataset)
@@ -180,5 +180,12 @@ def draw_loss(output_dir="./transunet_visual"):
     plt.savefig(os.path.join(output_dir, f"train_val_loss.png"))
     plt.close()
     
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+  import argparse, pathlib
+  parser = argparse.ArgumentParser()
+  parser.add_argument('--datapath', default="/Volumes/data/dataset/paip/output_images_and_masks", help='base path of dataset.')
+  parser.add_argument('--resolution', default=512, help='resolution of img.')
+  parser.add_argument('--savefile', default="./transunet_visual", help='save visualized and loss filename')
+  args = parser.parse_args()
+  
+  main(datapath=args.datapath)
