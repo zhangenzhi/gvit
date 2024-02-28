@@ -1,3 +1,5 @@
+ #!/bin/bash
+#SBATCH -A bif146
 #SBATCH -o transunet.o%J
 #SBATCH -t 02:00:00
 #SBATCH -N 1
