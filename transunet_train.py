@@ -191,4 +191,6 @@ if __name__ == '__main__':
   args = parser.parse_args()
   
   main(datapath=args.datapath, 
-       resolution=args.resolution)
+       resolution=args.resolution,
+       epoch=args.epoch,
+       batch_size=args.batch_size)
