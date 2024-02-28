@@ -7,24 +7,20 @@
 
 #export PATH=$PWD/conda/bin:$PATH
 #eval "$($PWD/conda/bin/conda shell.bash hook)"
-set +x
-source ~/miniconda_frontier/etc/profile.d/conda.sh
-conda activate /ccs/home/enzhi/miniconda_frontier/envs/gvit
 
-export LD_PRELOAD="/usr/lib64/libcrypto.so /usr/lib64/libssh.so.4 /usr/lib64/libssl.so.1.1"
+# set +x
+# source ~/miniconda_frontier/etc/profile.d/conda.sh
+# conda activate /ccs/home/enzhi/miniconda_frontier/envs/gvit
 
-module load PrgEnv-gnu
-module load gcc/11.2.0
-module load rocm/5.7.0
+# export LD_PRELOAD="/usr/lib64/libcrypto.so /usr/lib64/libssh.so.4 /usr/lib64/libssl.so.1.1"
+
+# module load PrgEnv-gnu
+# module load gcc/12.2.0
+# module load rocm/5.7.0
 
 # grab nodecount
 nodes=($(cat ${LSB_DJOB_HOSTFILE} | sort | uniq | grep -v login | grep -v batch))
 nnodes=${#nodes[@]}
-
-export MIOPEN_USER_DB_PATH="/tmp/my-miopen-cache"
-export MIOPEN_CUSTOM_CACHE_DIR=${MIOPEN_USER_DB_PATH}
-rm -rf ${MIOPEN_USER_DB_PATH}
-mkdir -p ${MIOPEN_USER_DB_PATH}
 
 # exec
 python3 transunet_train.py \
