@@ -15,12 +15,16 @@ export LD_PRELOAD="/usr/lib64/libcrypto.so /usr/lib64/libssh.so.4 /usr/lib64/lib
 
 module load PrgEnv-gnu
 module load gcc/11.2.0
-module load rocm/5.4.0
-pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm5.7
+module load rocm/5.7.0
 
 # grab nodecount
 nodes=($(cat ${LSB_DJOB_HOSTFILE} | sort | uniq | grep -v login | grep -v batch))
 nnodes=${#nodes[@]}
+
+export MIOPEN_USER_DB_PATH="/tmp/my-miopen-cache"
+export MIOPEN_CUSTOM_CACHE_DIR=${MIOPEN_USER_DB_PATH}
+rm -rf ${MIOPEN_USER_DB_PATH}
+mkdir -p ${MIOPEN_USER_DB_PATH}
 
 # exec
 python3 transunet_train.py \
