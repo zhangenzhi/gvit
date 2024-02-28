@@ -29,7 +29,7 @@ class DiceLoss(nn.Module):
         loss = 1.0 - dice_coefficient  # Adjusted to ensure non-negative loss
         return loss
 
-def main(datapath, resolution, epoch, batch_size):
+def main(datapath, resolution, epoch, batch_size, savefile):
     # Create an instance of the U-Net model and other necessary components
     num_classes = 1
     unet_model = TransUNet(img_dim=512,
@@ -188,9 +188,9 @@ if __name__ == '__main__':
                         help='base path of dataset.')
     parser.add_argument('--resolution', default=512, type=int,
                         help='resolution of img.')
-    parser.add_argument('--epoch', default=100, type=int,
+    parser.add_argument('--epoch', default=10, type=int,
                         help='Epoch of training.')
-    parser.add_argument('--batch_size', default=16, type=int,
+    parser.add_argument('--batch_size', default=8, type=int,
                         help='Batch_size for training')
     parser.add_argument('--savefile', default="./transunet_visual",
                         help='save visualized and loss filename')
