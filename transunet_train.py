@@ -27,7 +27,7 @@ class DiceLoss(nn.Module):
         loss = 1.0 - dice_coefficient  # Adjusted to ensure non-negative loss
         return loss
 
-def main(datapath, resolution):
+def main(datapath, resolution, epoch, batch_size):
     # Create an instance of the U-Net model and other necessary components
     num_classes = 1
     unet_model = TransUNet(img_dim=512,
@@ -56,12 +56,12 @@ def main(datapath, resolution):
 
     train_set, val_set, test_set = random_split(dataset, [train_size, val_size, test_size])
 
-    train_loader = DataLoader(train_set, batch_size=8, shuffle=True)
-    val_loader = DataLoader(val_set, batch_size=8, shuffle=False)
-    test_loader = DataLoader(test_set, batch_size=8, shuffle=False)
+    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(val_set, batch_size=batch_size, shuffle=False)
+    test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False)
 
     # Training loop
-    num_epochs = 10
+    num_epochs = epoch
     train_losses = []
     val_losses = []
     output_dir = "./visualizations"  # Change this to the desired directory
@@ -185,7 +185,10 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser()
   parser.add_argument('--datapath', default="/Volumes/data/dataset/paip/output_images_and_masks", help='base path of dataset.')
   parser.add_argument('--resolution', default=512, help='resolution of img.')
+  parser.add_argument('--epoch', default=100, help='Epoch of training.')
+  parser.add_argument('--batch_size', default=16, help='Batch_size for training')
   parser.add_argument('--savefile', default="./transunet_visual", help='save visualized and loss filename')
   args = parser.parse_args()
   
-  main(datapath=args.datapath, resolution=args.resolution)
+  main(datapath=args.datapath, 
+       resolution=args.resolution)
