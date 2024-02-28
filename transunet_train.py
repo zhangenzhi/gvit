@@ -188,4 +188,4 @@ if __name__ == '__main__':
   parser.add_argument('--savefile', default="./transunet_visual", help='save visualized and loss filename')
   args = parser.parse_args()
   
-  main(datapath=args.datapath)
+  main(datapath=args.datapath, resolution=args.resolution)

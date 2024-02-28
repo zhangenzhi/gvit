@@ -23,4 +23,4 @@ nnodes=${#nodes[@]}
 python3 transunet_train.py \
         --datapath=./dataset/paip/output_images_and_masks \
         --resolution=512 \
-        --savefile=./transunet_visual transunet_train.py
+        --savefile=./transunet_visual
