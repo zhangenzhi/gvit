@@ -1,6 +1,8 @@
 import os
 import sys
 sys.path.append("./")
+import argparse
+from pathlib import Path
 import torch
 import torchvision
 import torch.nn as nn
@@ -181,16 +183,21 @@ def draw_loss(output_dir="./transunet_visual"):
     plt.close()
     
 if __name__ == '__main__':
-  import argparse, pathlib
-  parser = argparse.ArgumentParser()
-  parser.add_argument('--datapath', default="/Volumes/data/dataset/paip/output_images_and_masks", help='base path of dataset.')
-  parser.add_argument('--resolution', default=512, help='resolution of img.')
-  parser.add_argument('--epoch', default=100, help='Epoch of training.')
-  parser.add_argument('--batch_size', default=16, help='Batch_size for training')
-  parser.add_argument('--savefile', default="./transunet_visual", help='save visualized and loss filename')
-  args = parser.parse_args()
-  
-  main(datapath=args.datapath, 
-       resolution=args.resolution,
-       epoch=args.epoch,
-       batch_size=args.batch_size)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--datapath', default="/Volumes/data/dataset/paip/output_images_and_masks", 
+                        help='base path of dataset.')
+    parser.add_argument('--resolution', default=512, type=int,
+                        help='resolution of img.')
+    parser.add_argument('--epoch', default=100, type=int,
+                        help='Epoch of training.')
+    parser.add_argument('--batch_size', default=16, type=int,
+                        help='Batch_size for training')
+    parser.add_argument('--savefile', default="./transunet_visual",
+                        help='save visualized and loss filename')
+    args = parser.parse_args()
+
+    main(datapath=Path(args.datapath), 
+         resolution=args.resolution,
+         epoch=args.epoch,
+         batch_size=args.batch_size,
+         savefile=args.savefile)
