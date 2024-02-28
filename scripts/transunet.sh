@@ -16,6 +16,7 @@ export LD_PRELOAD="/usr/lib64/libcrypto.so /usr/lib64/libssh.so.4 /usr/lib64/lib
 module load PrgEnv-gnu
 module load gcc/11.2.0
 module load rocm/5.4.0
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm5.7
 
 # grab nodecount
 nodes=($(cat ${LSB_DJOB_HOSTFILE} | sort | uniq | grep -v login | grep -v batch))
