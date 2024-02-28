@@ -158,6 +158,8 @@ def main(datapath, resolution, epoch, batch_size, savefile):
 
     test_loss /= len(test_loader)
     print(f"Test Loss: {test_loss:.4f}")
+    
+    draw_loss(output_dir=output_dir)
 
 def draw_loss(output_dir="./transunet_visual"):
     output_dir = output_dir  # Change this to the desired directory
