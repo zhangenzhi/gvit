@@ -50,7 +50,7 @@ def main(datapath, resolution, epoch, batch_size, savefile):
     data_path = datapath
     resolution = resolution
 
-    dataset = PAIPDataset(data_path, resolution)
+    dataset = PAIPDataset(data_path, resolution,  normalize=False)
     dataset_size = len(dataset)
     train_size = int(0.7 * dataset_size)
     val_size = (dataset_size - train_size) // 2
@@ -198,9 +198,9 @@ if __name__ == '__main__':
                         help='save visualized and loss filename')
     args = parser.parse_args()
 
-    # main(datapath=Path(args.datapath), 
-    #      resolution=args.resolution,
-    #      epoch=args.epoch,
-    #      batch_size=args.batch_size,
-    #      savefile=args.savefile)
-    draw_loss("./visualizations")
+    main(datapath=Path(args.datapath), 
+         resolution=args.resolution,
+         epoch=args.epoch,
+         batch_size=args.batch_size,
+         savefile=args.savefile)
+    # draw_loss("./visualizations")
