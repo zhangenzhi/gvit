@@ -198,8 +198,9 @@ if __name__ == '__main__':
                         help='save visualized and loss filename')
     args = parser.parse_args()
 
-    main(datapath=Path(args.datapath), 
-         resolution=args.resolution,
-         epoch=args.epoch,
-         batch_size=args.batch_size,
-         savefile=args.savefile)
+    # main(datapath=Path(args.datapath), 
+    #      resolution=args.resolution,
+    #      epoch=args.epoch,
+    #      batch_size=args.batch_size,
+    #      savefile=args.savefile)
+    draw_loss("./visualizations")

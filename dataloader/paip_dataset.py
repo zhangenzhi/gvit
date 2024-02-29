@@ -9,7 +9,7 @@ from torchvision import transforms
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 class PAIPDataset(Dataset):
-    def __init__(self, data_path, resolution, normalize=True):
+    def __init__(self, data_path, resolution, normalize=False):
         self.data_path = data_path
         self.resolution = resolution
 

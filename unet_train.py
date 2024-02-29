@@ -92,7 +92,7 @@ def main():
     data_path = "/Volumes/data/dataset/paip/output_images_and_masks"
     resolution = 512
     batch_size = 16
-    dataset = PAIPDataset(data_path, resolution)
+    dataset = PAIPDataset(data_path, resolution, normalize=False)
     dataset_size = len(dataset)
     train_size = int(0.7 * dataset_size)
     val_size = (dataset_size - train_size) // 2
