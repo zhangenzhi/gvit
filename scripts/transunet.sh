@@ -5,8 +5,8 @@
 #SBATCH -N 1
 #SBATCH -p batch
 
-#export PATH=$PWD/conda/bin:$PATH
-#eval "$($PWD/conda/bin/conda shell.bash hook)"
+# export PATH=$PWD/conda/bin:$PATH
+# eval "$($PWD/conda/bin/conda shell.bash hook)"
 
 # set +x
 # source ~/miniconda_frontier/etc/profile.d/conda.sh

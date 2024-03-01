@@ -90,18 +90,21 @@ class Encoder(nn.Module):
         self.norm2 = nn.BatchNorm2d(512)
 
     def forward(self, x):
+        # x shape: (batch_size, in_channels, height, width)
         x = self.conv1(x)
         x = self.norm1(x)
         x1 = self.relu(x)
+        # x1 shape: (batch_size, out_channels, height/2, width/2)
 
-        x2 = self.encoder1(x1)
-        x3 = self.encoder2(x2)
-        x = self.encoder3(x3)
+        x2 = self.encoder1(x1) # [2, 1024, 128, 128]
+        x3 = self.encoder2(x2) # [2, 512, 64, 64]
+        x = self.encoder3(x3) #  [2,1024,32,32]
+        # x shape after encoder3: (batch_size, out_channels*8, height/16, width/16)
+        
+        x = self.vit(x) # [2, 1024, 1024]
+        x = rearrange(x, "b (x y) c -> b c x y", x=self.vit_img_dim, y=self.vit_img_dim) # [2, 1024, 32, 32]
 
-        x = self.vit(x)
-        x = rearrange(x, "b (x y) c -> b c x y", x=self.vit_img_dim, y=self.vit_img_dim)
-
-        x = self.conv2(x)
+        x = self.conv2(x) # [2, 512, 32, 32]
         x = self.norm2(x)
         x = self.relu(x)
 

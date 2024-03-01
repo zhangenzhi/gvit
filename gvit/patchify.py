@@ -38,6 +38,13 @@ def transform(img, dsize:tuple=(512, 512)):
     edge = cv.Canny(blur, 100, 200)
     return res, edge
 
+def count_info(qdt:QuadTree):
+    patch_info = {}
+    print(qdt.count_patches(patch_info))
+    print(patch_info)
+    print(sum(patch_info.values()))
+    return patch_info
+
 # save patch sequence
 def compress_mix_patches(qdt:QuadTree, img: np.array, to_size:tuple = (8,8,3)):
     h2,w2,c2 = to_size
@@ -87,5 +94,11 @@ def patchify(args):
         pass
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset', default="paip", help='name of dataset.')
+    parser.add_argument('--datapath', default="/Volumes/data/dataset/paip/output_images_and_masks", 
+                        help='base path of dataset.')
     args = parser.parse_args()
+    
+    patchify(args)
     
