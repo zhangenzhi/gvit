@@ -1,4 +1,6 @@
 import os 
+import sys
+sys.path.append("./")
 import glob 
 from pathlib import Path
 import numpy as np
@@ -8,11 +10,24 @@ from gvit.quadtree import QuadTree
 
 # patchify
  
-def get_img_path(base="./dataset/exp/"):
-    files = []
-    for f in glob.glob(os.path.join(base, "*/*.jpeg")):
-        files.append(f)
-    return files
+def get_png_path(base, resolution):
+    data_path = base
+    image_filenames = []
+    mask_filenames = []
+
+    for subdir in os.listdir(data_path):
+        subdir_path = os.path.join(data_path, subdir)
+        if os.path.isdir(subdir_path):
+            image = os.path.join(subdir_path, f"rescaled_image_0_{resolution}x{resolution}.png")
+            mask = os.path.join(subdir_path, f"rescaled_mask_0_{resolution}x{resolution}.png")
+
+            # Ensure the image exist
+            if os.path.exists(image) and os.path.exists(mask):
+
+                image_filenames.extend([image])
+                mask_filenames.extend([mask])
+                
+    return image_filenames
 
 def transform(img):
     res = cv.resize(img, dsize=(512, 512), interpolation=cv.INTER_CUBIC)
@@ -34,12 +49,11 @@ def compress_mix_patches(qdt:QuadTree, img: np.array, to_size:tuple = (8,8,3)):
         assert seq_patches[i].shape == (h2,w2,c2), "Wrong shape {} get, need {}".format(seq_patches[i].shape, (h2,w2,c2))
     return seq_patches
 
-def custom_patchify(base="./dataset/exp", to_size: tuple=(8,8,3)):
-    img_path = get_img_path(base=base)
+def paip_patchify(base,  resolution: int, to_size: tuple=(8,8,3)):
+    img_path = get_png_path(base=base, resolution=resolution)
     patch_size = to_size[0]
-    save_to = base+"_qdt"
-    if not os.path.exists(save_to):
-        os.makedirs(save_to)
+    output_dir = base+"_qdt"
+    os.makedirs(output_dir, exist_ok=True)
         
     for i,p in enumerate(img_path):
         img = cv.imread(p)
@@ -49,7 +63,16 @@ def custom_patchify(base="./dataset/exp", to_size: tuple=(8,8,3)):
         seq_img = np.asarray(seq_patches)
         seq_img = np.reshape(seq_img,(patch_size, -1, 3))
         name = Path(p).parts[-2]
-        cv.imwrite(save_to+"/{}_{}.jpeg".format(i, name), seq_img)
+        cv.imwrite(output_dir+"/{}_{}.jpeg".format(i, name), seq_img)
 
-if __name__ == "__main__":  
-    custom_patchify()
+
+if __name__ == "__main__":
+    # Input directory paths
+    image_directory = "/Volumes/data/dataset/paip/output_images_and_masks/"
+    resolution = 512
+    dataset = "paip"
+    if dataset == "paip":
+        paip_patchify(base=image_directory, resolution=512)
+        print("Patchify finished.")
+    else:
+        print("No such dataset.")
