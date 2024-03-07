@@ -115,15 +115,15 @@ class ViT(nn.Module):
     def forward(self, x):
         img_patches = rearrange(x,
                                 'b c (patch_x x) (patch_y y) -> b (x y) (patch_x patch_y c)',
-                                patch_x=self.patch_size, patch_y=self.patch_size)
+                                patch_x=self.patch_size, patch_y=self.patch_size) #x=[2,1024,32,32]
 
-        batch_size, tokens, _ = img_patches.shape
+        batch_size, tokens, _ = img_patches.shape # [b,tokens,emb]  [2,1024,1024]
 
-        project = self.projection(img_patches)
+        project = self.projection(img_patches)  # [b,tokens,emb]  [2,1024,1024]
         token = repeat(self.cls_token, 'b ... -> (b batch_size) ...',
-                       batch_size=batch_size)
+                       batch_size=batch_size)  # [2,1,1024]
 
-        patches = torch.cat([token, project], dim=1)
+        patches = torch.cat([token, project], dim=1)  # [b,tokens+1,emb]  [2,1024,1024]
         patches += self.embedding[:tokens + 1, :]
 
         x = self.dropout(patches)

@@ -73,6 +73,9 @@ class QuadTree:
             return 1
         return total_patches
     
+    def build_adaptive(self):
+        pass
+    
     def _build_tree(self):
         if self.bbox == None:
             h,w = self.domain.shape
@@ -82,7 +85,6 @@ class QuadTree:
         if value > self.max_value and self.depth<self.max_depth:
             self.divide()
         
-    
     def divide(self):
         x1,x2,y1,y2 = self.bbox.get_coord()
         

@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from einops import rearrange
+import torch.nn.functional as F
 
 from model.vit import ViT
 
@@ -140,11 +141,12 @@ class TransUNet(nn.Module):
                                head_num, mlp_dim, block_num, patch_size)
 
         self.decoder = Decoder(out_channels, class_num)
+        
+        self.img_dim = img_dim
 
     def forward(self, x):
         x, x1, x2, x3 = self.encoder(x)
         x = self.decoder(x, x1, x2, x3)
-
         return x
 
 
