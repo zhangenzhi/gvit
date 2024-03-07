@@ -110,7 +110,7 @@ class PAIQDTDataset(Dataset):
 
         # Apply transformations
         image = self.transform(image)
-        qdt = self.transform(qdt)
+        qdt = self.transform_qdt(qdt)
         mask = self.transform_mask(mask)
 
         return image, qdt, mask
