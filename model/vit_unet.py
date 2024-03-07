@@ -17,6 +17,7 @@ class EncoderBottleneck(nn.Module):
         self.encoder_block = TransformerEncoderBlock(embedding_dim, head_num, mlp_dim)
         if proj:
             self.projection =  nn.Linear(embedding_dim, embedding_dim*2)
+            # self.projection = nn.Conv2d(embedding_dim, embedding_dim*2, kernel_size=3, stride=1, padding=1),
 
     def forward(self, x):
         x = self.encoder_block(x)
@@ -156,7 +157,7 @@ class ViTUNet(nn.Module):
 if __name__ == '__main__':
     import torch
 
-    transunet = ViTUNet(img_dim=512,
+    vitunet = ViTUNet(img_dim=512,
                         in_channels=3,
                         out_channels=128,
                         head_num=4,
@@ -165,5 +166,5 @@ if __name__ == '__main__':
                         patch_size=16,
                         class_num=1)
 
-    print(sum(p.numel() for p in transunet.parameters()))
-    print(transunet(torch.randn(1, 3, 512, 512)).shape)
+    print(sum(p.numel() for p in vitunet.parameters()))
+    print(vitunet(torch.randn(1, 3, 512, 512)).shape)

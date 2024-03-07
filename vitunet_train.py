@@ -37,7 +37,7 @@ def main(datapath, resolution, epoch, batch_size, savefile):
                         out_channels=128,
                         head_num=4,
                         mlp_dim=512,
-                        block_num=3,
+                        block_num=12,
                         patch_size=8,
                         class_num=num_classes)
     device = torch.device("cuda" if torch.cuda.is_available() else "mps")
