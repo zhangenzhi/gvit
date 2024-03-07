@@ -50,7 +50,7 @@ def main(datapath, resolution, epoch, batch_size, savefile):
     # Split the dataset into train, validation, and test sets
     data_path = datapath
 
-    dataset = PAIQDTDataset(data_path, resolution,  normalize=False)
+    dataset = PAIQDTDataset(data_path, resolution,  normalize=True)
     dataset_size = len(dataset)
     train_size = int(0.7 * dataset_size)
     val_size = (dataset_size - train_size) // 2

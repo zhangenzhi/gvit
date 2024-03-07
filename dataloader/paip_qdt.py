@@ -43,12 +43,16 @@ class PAIQDTDataset(Dataset):
             transforms.ToTensor(),
         ])
         
+        self.transform_qdt= transforms.Compose([
+            transforms.ToTensor(),
+        ])
+        
         self.transform_mask= transforms.Compose([
             transforms.ToTensor(),
         ])
 
         if normalize:
-            self.transform.transforms.append(transforms.Normalize(mean=self.mean, std=self.std))
+            self.transform_qdt.transforms.append(transforms.Normalize(mean=self.mean, std=self.std))
             # self.transform_mask.transforms.append(transforms.Normalize(mean=self.mask_m, std=self.mask_std))
     
     
@@ -58,7 +62,7 @@ class PAIQDTDataset(Dataset):
         std_acc = np.zeros(3)
 
         # Loop through the dataset and accumulate channel-wise mean and std
-        for img_name in self.image_filenames:
+        for img_name in self.qdt_filenames:
             img = Image.open(img_name).convert("RGB")
             img_np = np.array(img) / 255.0  # Normalize pixel values to [0, 1]
             
@@ -67,8 +71,8 @@ class PAIQDTDataset(Dataset):
             std_acc += np.std(img_np, axis=(0, 1))
 
         # Calculate the overall mean and std
-        mean = mean_acc / len(self.image_filenames)
-        std = std_acc / len(self.image_filenames)
+        mean = mean_acc / len(self.qdt_filenames)
+        std = std_acc / len(self.qdt_filenames)
 
         return mean.tolist(), std.tolist()
     
