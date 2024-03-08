@@ -30,7 +30,7 @@ class DecoderBottleneck(nn.Module):
         super().__init__()
 
         self.upsample = nn.Upsample(scale_factor=scale_factor, mode='bilinear', align_corners=True)
-        self.upsample_skips = [nn.ConvTranspose2d(3, 3, kernel_size=4, stride=2, padding=1) for _ in range(skips)]
+        self.upsample_skips = [nn.ConvTranspose2d(in_channels=in_channels, out_channels=in_channels, kernel_size=4, stride=2, padding=1) for _ in range(skips)]
         self.layer = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(out_channels),
