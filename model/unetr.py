@@ -72,7 +72,7 @@ class Encoder(nn.Module):
         self.relu = nn.ReLU(inplace=True)
         
         # temp
-        self.token_dim = 4096
+        self.token_dim = img_dim//patch_size * img_dim//patch_size
         self.vit_img_dim = int(math.sqrt(self.token_dim))
         self.cls_token = nn.Parameter(torch.randn(1, 1, embedding_dim*4))
         
