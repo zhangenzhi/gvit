@@ -120,9 +120,9 @@ class Decoder(nn.Module):
     def __init__(self, out_channels, class_num):
         super().__init__()
 
-        self.decoder1 = DecoderBottleneck(out_channels * 8, out_channels * 2, skip_factor=1)
-        self.decoder2 = DecoderBottleneck(out_channels * 4, out_channels, skip_factor=2)
-        self.decoder3 = DecoderBottleneck(out_channels * 2, int(out_channels * 1 / 2), skip_factor=3)
+        self.decoder1 = DecoderBottleneck(out_channels * 8, out_channels * 2, skips=1)
+        self.decoder2 = DecoderBottleneck(out_channels * 4, out_channels, skips=2)
+        self.decoder3 = DecoderBottleneck(out_channels * 2, int(out_channels * 1 / 2), skips=3)
         self.decoder4 = DecoderBottleneck(int(out_channels * 1 / 2), int(out_channels * 1 / 8))
 
         self.conv1 = nn.Conv2d(int(out_channels * 1 / 8), class_num, kernel_size=1)
