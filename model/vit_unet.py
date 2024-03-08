@@ -6,15 +6,14 @@ sys.path.append("./")
 import math
 import torch.nn.functional as F
 
-from model.vit import ViT
 from model.vit import TransformerEncoderBlock, TransformerEncoder
 
 
 class EncoderBottleneck(nn.Module):
-    def __init__(self,  embedding_dim, head_num, mlp_dim, proj=True):
+    def __init__(self,  embedding_dim, head_num, mlp_dim, num_blocks=3, proj=True):
         super().__init__()
         self.proj=proj
-        self.encoder_block = TransformerEncoderBlock(embedding_dim, head_num, mlp_dim)
+        self.encoder_block = nn.ModuleList([TransformerEncoderBlock(embedding_dim, head_num, mlp_dim) for _ in range(num_blocks)])
         if proj:
             self.projection =  nn.Linear(embedding_dim, embedding_dim*2)
             
