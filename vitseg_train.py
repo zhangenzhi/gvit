@@ -194,7 +194,7 @@ if __name__ == '__main__':
                         help='Epoch of training.')
     parser.add_argument('--batch_size', default=8, type=int,
                         help='Batch_size for training')
-    parser.add_argument('--savefile', default="./vitunet_visual",
+    parser.add_argument('--savefile', default="./vitseg_visual",
                         help='save visualized and loss filename')
     args = parser.parse_args()
 
