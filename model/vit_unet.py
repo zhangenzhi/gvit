@@ -17,8 +17,7 @@ class EncoderBottleneck(nn.Module):
         self.encoder_block = TransformerEncoderBlock(embedding_dim, head_num, mlp_dim)
         if proj:
             self.projection =  nn.Linear(embedding_dim, embedding_dim*2)
-            # self.projection = nn.Conv2d(embedding_dim, embedding_dim*2, kernel_size=3, stride=1, padding=1),
-
+            
     def forward(self, x):
         x = self.encoder_block(x)
         if self.proj:
@@ -27,11 +26,11 @@ class EncoderBottleneck(nn.Module):
 
 
 class DecoderBottleneck(nn.Module):
-    def __init__(self, in_channels, out_channels, scale_factor=2, skip_factor=2):
+    def __init__(self, in_channels, out_channels, scale_factor=2, skips=1):
         super().__init__()
 
         self.upsample = nn.Upsample(scale_factor=scale_factor, mode='bilinear', align_corners=True)
-        self.upsample_skip = nn.Upsample(scale_factor=skip_factor, mode='bilinear', align_corners=True)
+        self.upsample_skips = [nn.ConvTranspose2d(3, 3, kernel_size=4, stride=2, padding=1) for _ in range(skips)]
         self.layer = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(out_channels),
@@ -45,7 +44,8 @@ class DecoderBottleneck(nn.Module):
         x = self.upsample(x)
         
         if x_concat is not None:
-            x_concat = self.upsample_skip(x_concat)
+            for skp in self.upsample_skips:  
+                x_concat = skp(x_concat)
             x = torch.cat([x_concat, x], dim=1)
 
         x = self.layer(x)
@@ -120,9 +120,9 @@ class Decoder(nn.Module):
     def __init__(self, out_channels, class_num):
         super().__init__()
 
-        self.decoder1 = DecoderBottleneck(out_channels * 8, out_channels * 2, skip_factor=2)
-        self.decoder2 = DecoderBottleneck(out_channels * 4, out_channels, skip_factor=4)
-        self.decoder3 = DecoderBottleneck(out_channels * 2, int(out_channels * 1 / 2), skip_factor=8)
+        self.decoder1 = DecoderBottleneck(out_channels * 8, out_channels * 2, skip_factor=1)
+        self.decoder2 = DecoderBottleneck(out_channels * 4, out_channels, skip_factor=2)
+        self.decoder3 = DecoderBottleneck(out_channels * 2, int(out_channels * 1 / 2), skip_factor=3)
         self.decoder4 = DecoderBottleneck(int(out_channels * 1 / 2), int(out_channels * 1 / 8))
 
         self.conv1 = nn.Conv2d(int(out_channels * 1 / 8), class_num, kernel_size=1)
@@ -152,7 +152,7 @@ class ViTUNet(nn.Module):
         x, x1, x2, x3 = self.encoder(x)
         x = self.decoder(x, x1, x2, x3)
         x = self.upsampling(x)
-        # x = F.interpolate(x, size=(self.img_dim, self.img_dim), mode='bilinear', align_corners=False)
+     
         return x
 
 

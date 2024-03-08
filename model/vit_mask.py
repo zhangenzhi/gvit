@@ -10,12 +10,16 @@ from model.vit import TransformerEncoderBlock, TransformerEncoder
 from model.seg_mask import MaskTransformer
 
 class EncoderBottleneck(nn.Module):
-    def __init__(self,  embedding_dim, head_num, mlp_dim):
+    def __init__(self,  embedding_dim, head_num, mlp_dim, in_tokens, out_tokens):
         super().__init__()
         self.encoder_block = TransformerEncoderBlock(embedding_dim, head_num, mlp_dim)
-        
+        # self.length_samlping = nn.Linear(in_tokens, out_tokens)
     def forward(self, x):
         x = self.encoder_block(x)
+        # x = x.permute(0, 2, 1)
+        # x = self.length_samlping(x)
+        # x = x.permute(0, 2, 1)
+        
         return x
 
 
@@ -55,22 +59,21 @@ class Encoder(nn.Module):
         # x=[8,3,8,4096]
         x = self.conv1(x) # x=[8, 1024, 1, 512]
         x = self.norm1(x)
-        batch_size, channels, _, tokens = x.shape # [8,1024,1,529]
-        x= x.permute(0, 3, 1, 2).contiguous().view(batch_size, tokens, channels) # [b,tokens,emb]  [8,529,1024]
+        batch_size, channels, _, tokens = x.shape # [8,512,1,512]
+        x= x.permute(0, 3, 1, 2).contiguous().view(batch_size, tokens, channels) # [b,tokens,emb]  [8,512,512]
         
-        x1 = self.relu(x)  # [b,tokens,emb]  [8,529,128]
-        x2 = self.encoder1(x1)  # [b,tokens,emb]  [8,529,512]
-        x3 = self.encoder2(x2)  # [b,tokens,emb]  [8,529,512]
-        x4 = self.encoder3(x3)  # [b,tokens,emb]  [8,529,512]
+        x1 = self.relu(x)  # [b,tokens,emb]  [8,512,512]
+        x2 = self.encoder1(x1)  # [b,tokens,emb]  [8,512,512]
+        x3 = self.encoder2(x2)  # [b,tokens,emb]  [8,512,512]
+        x4 = self.encoder3(x3)  # [b,tokens,emb]  [8,512,512]
         # x, x1, x2, x3 : (batch_size, tokens, emb)
         
-        token = repeat(self.cls_token, 'b ... -> (b batch_size) ...', batch_size=batch_size)  # [2, 1, 128]
-        patches = torch.cat([token, x4], dim=1)  # [b, tokens+1, emb]  [8,530,128]
+        token = repeat(self.cls_token, 'b ... -> (b batch_size) ...', batch_size=batch_size)  # [2, 1, 512]
+        patches = torch.cat([token, x4], dim=1)  # [b, tokens+1, emb]  [8,513,512]
         patches += self.embedding[:tokens + 1, :]
         x4 = self.dropout(patches)
         x4 = self.transformer(x4)
         x4 = self.mlp_head(x4[:, 0, :]) if self.classification else x4[:, 1:, :]
-        # x4 = rearrange(x4, "b (x y) c -> b c x y", x=self.vit_img_dim, y=self.vit_img_dim) # [2, 128, 23, 23]
 
         return x4
 
@@ -82,8 +85,6 @@ class Decoder(nn.Module):
         self.masked_decoder = MaskTransformer(n_cls=1, patch_size=32, d_encoder=512, n_heads=8,
                                               n_layers=8, d_model=512, d_ff=4*512, drop_path_rate=0.0, 
                                               dropout=0.0)
-
-        self.conv1 = nn.Conv2d(int(out_channels * 1 / 8), class_num, kernel_size=1)
 
     def forward(self, x):
         x = self.masked_decoder(x, im_size=(512,512))
