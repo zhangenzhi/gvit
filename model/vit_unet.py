@@ -18,7 +18,8 @@ class EncoderBottleneck(nn.Module):
             self.projection =  nn.Linear(embedding_dim, embedding_dim*2)
             
     def forward(self, x):
-        x = self.encoder_block(x)
+        for blk in self.encoder_block:
+            x = blk(x)
         if self.proj:
             x = self.projection(x)
         return x
