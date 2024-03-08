@@ -34,22 +34,19 @@ class Encoder(nn.Module):
         
         # temp
         self.token_dim = 512
-        self.vit_img_dim = int(math.sqrt(self.token_dim)) + 1
         self.cls_token = nn.Parameter(torch.randn(1, 1, embedding_dim))
         
         self.projection = nn.Linear(self.token_dim, embedding_dim)
-        self.embedding = nn.Parameter(torch.rand(self.vit_img_dim*self.vit_img_dim + 1, embedding_dim))
+        self.embedding = nn.Parameter(torch.rand(img_dim + 1, embedding_dim))
         
         self.encoder1 = EncoderBottleneck(embedding_dim, head_num, mlp_dim)
         self.encoder2 = EncoderBottleneck(embedding_dim, head_num, mlp_dim)
         self.encoder3 = EncoderBottleneck(embedding_dim, head_num, mlp_dim)
-
-        self.img_proj = nn.Linear(self.token_dim, self.vit_img_dim*self.vit_img_dim)
         
         self.dropout = nn.Dropout(0.1)
         self.transformer = TransformerEncoder(embedding_dim, head_num, mlp_dim, block_num)
         
-        self.norm2 = nn.BatchNorm2d(self.vit_img_dim*self.vit_img_dim)
+        self.norm2 = nn.BatchNorm2d(self.token_dim)
         
         if self.classification:
             self.mlp_head = nn.Linear(embedding_dim, num_classes)
@@ -58,12 +55,11 @@ class Encoder(nn.Module):
         # x=[8,3,8,4096]
         x = self.conv1(x) # x=[8, 1024, 1, 512]
         x = self.norm1(x)
-        x = self.img_proj(x)
         batch_size, channels, _, tokens = x.shape # [8,1024,1,529]
         x= x.permute(0, 3, 1, 2).contiguous().view(batch_size, tokens, channels) # [b,tokens,emb]  [8,529,1024]
         
         x1 = self.relu(x)  # [b,tokens,emb]  [8,529,128]
-        x2 = self.encoder1(x1)  # [b,tokens,emb]  [8,529,258]
+        x2 = self.encoder1(x1)  # [b,tokens,emb]  [8,529,512]
         x3 = self.encoder2(x2)  # [b,tokens,emb]  [8,529,512]
         x4 = self.encoder3(x3)  # [b,tokens,emb]  [8,529,512]
         # x, x1, x2, x3 : (batch_size, tokens, emb)
@@ -74,7 +70,7 @@ class Encoder(nn.Module):
         x4 = self.dropout(patches)
         x4 = self.transformer(x4)
         x4 = self.mlp_head(x4[:, 0, :]) if self.classification else x4[:, 1:, :]
-        x4 = rearrange(x4, "b (x y) c -> b c x y", x=self.vit_img_dim, y=self.vit_img_dim) # [2, 128, 23, 23]
+        # x4 = rearrange(x4, "b (x y) c -> b c x y", x=self.vit_img_dim, y=self.vit_img_dim) # [2, 128, 23, 23]
 
         return x4
 
@@ -83,16 +79,14 @@ class Decoder(nn.Module):
     def __init__(self, out_channels, class_num):
         super().__init__()
 
-        self.masked_decoder = MaskTransformer(n_cls=1, patch_size=8, d_encoder=512, n_heads=6,
+        self.masked_decoder = MaskTransformer(n_cls=1, patch_size=32, d_encoder=512, n_heads=8,
                                               n_layers=8, d_model=512, d_ff=4*512, drop_path_rate=0.0, 
-                                              drop_rate=0.0,)
+                                              dropout=0.0)
 
         self.conv1 = nn.Conv2d(int(out_channels * 1 / 8), class_num, kernel_size=1)
 
     def forward(self, x):
-        x = self.masked_decoder(x)
-        x = self.conv1(x)
-
+        x = self.masked_decoder(x, im_size=(512,512))
         return x
 
 
@@ -104,18 +98,14 @@ class ViTSeg(nn.Module):
                                head_num, mlp_dim, block_num, patch_size, classification=False, num_classes=1)
 
         self.decoder = Decoder(out_channels, class_num)
-        self.upsampling = nn.Upsample(size=(self.img_dim, self.img_dim), mode='bilinear', align_corners=True)
         self.img_dim = img_dim
+        self.upsampling = nn.Upsample(size=(self.img_dim, self.img_dim), mode='bilinear', align_corners=True)
 
     def forward(self, x):
         x = self.encoder(x)
         x = self.decoder(x)
         x = self.upsampling(x)
-        
-        # masks = F.interpolate(masks, size=(H, W), mode="bilinear")
-        # masks = unpadding(masks, (H_ori, W_ori))
 
-        return masks
         return x
 
 

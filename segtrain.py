@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
 import numpy as np
 import matplotlib.pyplot as plt
 
-from model.vit_mask import 
+from model.vit_mask import ViTSeg
 from dataloader.paip_qdt import PAIQDTDataset
 
 # Define the Dice Loss
@@ -32,9 +32,9 @@ class DiceLoss(nn.Module):
 def main(datapath, resolution, epoch, batch_size, savefile):
     # Create an instance of the U-Net model and other necessary components
     num_classes = 1
-    unet_model = ViTCNN(img_dim=512,
+    unet_model = ViTSeg(img_dim=512,
                         in_channels=3,
-                        out_channels=256,
+                        out_channels=512,
                         head_num=4,
                         mlp_dim=512,
                         block_num=12,
