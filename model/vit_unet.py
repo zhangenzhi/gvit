@@ -29,7 +29,8 @@ class DecoderBottleneck(nn.Module):
     def __init__(self, in_channels, out_channels, scale_factor=2, skips=1):
         super().__init__()
 
-        self.upsample = nn.Upsample(scale_factor=scale_factor, mode='bilinear', align_corners=True)
+        self.upsample = nn.ConvTranspose2d(in_channels=in_channels//2, out_channels=in_channels//2, 
+                                           kernel_size=4, stride=2, padding=1)
         self.upsample_skips = nn.ModuleList([nn.ConvTranspose2d(in_channels=in_channels//2, out_channels=in_channels//2, 
                                                                 kernel_size=4, stride=2, padding=1) for _ in range(skips)])
         self.layer = nn.Sequential(
