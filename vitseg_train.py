@@ -45,7 +45,8 @@ def main(datapath, resolution, epoch, batch_size, savefile):
     # Move the model to GPU
     unet_model.to(device)
     criterion = DiceLoss()
-    optimizer = optim.Adam(unet_model.parameters(), lr=0.001)
+    # optimizer = optim.Adam(unet_model.parameters(), lr=0.001)
+    optimizer = optim.SGD(unet_model.parameters(), lr=0.001)
 
     # Split the dataset into train, validation, and test sets
     data_path = datapath

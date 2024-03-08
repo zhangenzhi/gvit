@@ -10,7 +10,7 @@ from model.vit import TransformerEncoderBlock, TransformerEncoder
 from model.seg_mask import MaskTransformer
 
 class EncoderBottleneck(nn.Module):
-    def __init__(self,  embedding_dim, head_num, mlp_dim, in_tokens, out_tokens):
+    def __init__(self,  embedding_dim, head_num, mlp_dim):
         super().__init__()
         self.encoder_block = TransformerEncoderBlock(embedding_dim, head_num, mlp_dim)
         # self.length_samlping = nn.Linear(in_tokens, out_tokens)
