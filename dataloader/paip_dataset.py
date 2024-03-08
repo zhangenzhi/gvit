@@ -18,6 +18,7 @@ class PAIPDataset(Dataset):
         self.resolution = resolution
 
         self.image_filenames = []
+        self.timg_filenames = []
         self.mask_filenames = []
 
         for subdir in os.listdir(data_path):
@@ -30,6 +31,7 @@ class PAIPDataset(Dataset):
                 if os.path.exists(image) and os.path.exists(mask):
 
                     self.image_filenames.extend([image])
+                    self.timg_filenames.extend([image])
                     self.mask_filenames.extend([mask])
 
         # Compute mean and std from the dataset (you need to implement this)
@@ -37,6 +39,10 @@ class PAIPDataset(Dataset):
         self.mask_m, self.mask_std = self.compute_mask_statistics()
 
         self.transform= transforms.Compose([
+            transforms.ToTensor(),
+        ])
+        
+        self.transform_timg= transforms.Compose([
             transforms.ToTensor(),
         ])
         
@@ -93,17 +99,20 @@ class PAIPDataset(Dataset):
         return len(self.image_filenames)
 
     def __getitem__(self, idx):
+        timg_name = self.timg_filenames[idx]
         img_name = self.image_filenames[idx]
         mask_name = self.mask_filenames[idx]
 
+        timage = Image.open(timg_name).convert("RGB")
         image = Image.open(img_name).convert("RGB")
         mask = Image.open(mask_name).convert("L")  # Assuming masks are grayscale
 
         # Apply transformations
+        timage = self.transform_timg(timage)
         image = self.transform(image)
         mask = self.transform_mask(mask)
 
-        return image, mask
+        return timage, image, mask
 
 import matplotlib.pyplot as plt
 import torchvision.transforms.functional as F

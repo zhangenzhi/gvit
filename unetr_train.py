@@ -12,8 +12,7 @@ from torch.utils.data import DataLoader
 import numpy as np
 import matplotlib.pyplot as plt
 
-from model.vit_unet import ViTUNet
-from dataloader.paip_qdt import PAIQDTDataset
+from model.unetr import UNetr
 from dataloader.paip_dataset import PAIPDataset
 
 # Define the Dice Loss
@@ -33,7 +32,7 @@ class DiceLoss(nn.Module):
 def main(datapath, resolution, epoch, batch_size, savefile):
     # Create an instance of the U-Net model and other necessary components
     num_classes = 1
-    unet_model = ViTUNet(img_dim=512,
+    unet_model = UNetr(img_dim=512,
                         in_channels=3,
                         out_channels=128,
                         head_num=4,
@@ -194,7 +193,7 @@ if __name__ == '__main__':
                         help='resolution of img.')
     parser.add_argument('--epoch', default=10, type=int,
                         help='Epoch of training.')
-    parser.add_argument('--batch_size', default=8, type=int,
+    parser.add_argument('--batch_size', default=2, type=int,
                         help='Batch_size for training')
     parser.add_argument('--savefile', default="./vitunet_visual",
                         help='save visualized and loss filename')
