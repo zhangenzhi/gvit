@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
 import numpy as np
 import matplotlib.pyplot as plt
 
-from model.vit_cnn import ViTCNN
+from model.vit_mask import 
 from dataloader.paip_qdt import PAIQDTDataset
 
 # Define the Dice Loss

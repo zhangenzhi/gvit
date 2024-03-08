@@ -145,12 +145,13 @@ class ViTUNet(nn.Module):
                                head_num, mlp_dim, block_num, patch_size, classification=False, num_classes=1)
 
         self.decoder = Decoder(out_channels, class_num)
+        self.upsampling = nn.Upsample(size=(self.img_dim, self.img_dim), mode='bilinear', align_corners=True)
         self.img_dim = img_dim
 
     def forward(self, x):
         x, x1, x2, x3 = self.encoder(x)
         x = self.decoder(x, x1, x2, x3)
-        x = nn.Upsample(size=(self.img_dim, self.img_dim), mode='bilinear', align_corners=True)(x)
+        x = self.upsampling(x)
         # x = F.interpolate(x, size=(self.img_dim, self.img_dim), mode='bilinear', align_corners=False)
         return x
 

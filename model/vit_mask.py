@@ -7,7 +7,7 @@ import math
 import torch.nn.functional as F
 
 from model.vit import TransformerEncoderBlock, TransformerEncoder
-
+from model.seg_mask import MaskTransformer
 
 class EncoderBottleneck(nn.Module):
     def __init__(self,  embedding_dim, head_num, mlp_dim):
@@ -16,26 +16,6 @@ class EncoderBottleneck(nn.Module):
         
     def forward(self, x):
         x = self.encoder_block(x)
-        return x
-
-
-class DecoderBottleneck(nn.Module):
-    def __init__(self, in_channels, out_channels, scale_factor=2, skip_factor=2):
-        super().__init__()
-
-        self.upsample = nn.Upsample(scale_factor=scale_factor, mode='bilinear', align_corners=True)
-        self.layer = nn.Sequential(
-            nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True)
-        )
-
-    def forward(self, x, x_concat=None):
-        x = self.upsample(x)
-        x = self.layer(x)
         return x
 
 
@@ -103,24 +83,20 @@ class Decoder(nn.Module):
     def __init__(self, out_channels, class_num):
         super().__init__()
 
-        self.decoder1 = DecoderBottleneck(out_channels, out_channels * 2)
-        self.decoder2 = DecoderBottleneck(out_channels * 2, out_channels*4)
-        self.decoder3 = DecoderBottleneck(out_channels * 4, int(out_channels * 1 / 2))
-        self.decoder4 = DecoderBottleneck(int(out_channels * 1 / 2), int(out_channels * 1 / 8))
+        self.masked_decoder = MaskTransformer(n_cls=1, patch_size=8, d_encoder=512, n_heads=6,
+                                              n_layers=8, d_model=512, d_ff=4*512, drop_path_rate=0.0, 
+                                              drop_rate=0.0,)
 
         self.conv1 = nn.Conv2d(int(out_channels * 1 / 8), class_num, kernel_size=1)
 
     def forward(self, x):
-        x = self.decoder1(x)
-        x = self.decoder2(x)
-        x = self.decoder3(x)
-        x = self.decoder4(x)
+        x = self.masked_decoder(x)
         x = self.conv1(x)
 
         return x
 
 
-class ViTCNN(nn.Module):
+class ViTSeg(nn.Module):
     def __init__(self, img_dim, in_channels, out_channels, head_num, mlp_dim, block_num, patch_size, class_num):
         super().__init__()
 
@@ -128,19 +104,25 @@ class ViTCNN(nn.Module):
                                head_num, mlp_dim, block_num, patch_size, classification=False, num_classes=1)
 
         self.decoder = Decoder(out_channels, class_num)
+        self.upsampling = nn.Upsample(size=(self.img_dim, self.img_dim), mode='bilinear', align_corners=True)
         self.img_dim = img_dim
 
     def forward(self, x):
         x = self.encoder(x)
         x = self.decoder(x)
-        x = nn.Upsample(size=(self.img_dim, self.img_dim), mode='bilinear', align_corners=True)(x)
+        x = self.upsampling(x)
+        
+        # masks = F.interpolate(masks, size=(H, W), mode="bilinear")
+        # masks = unpadding(masks, (H_ori, W_ori))
+
+        return masks
         return x
 
 
 if __name__ == '__main__':
     import torch
 
-    vitunet = ViTCNN(img_dim=512,
+    vitunet = ViTSeg(img_dim=512,
                         in_channels=3,
                         out_channels=128,
                         head_num=4,
