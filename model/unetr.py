@@ -166,14 +166,23 @@ class UNetr(nn.Module):
 if __name__ == '__main__':
     import torch
 
-    UNetr = UNetr(img_dim=512,
-                        in_channels=3,
-                        out_channels=128,
-                        head_num=4,
-                        mlp_dim=512,
-                        block_num=8,
-                        patch_size=16,
-                        class_num=1)
+    unetr = UNetr(img_dim=512,
+                in_channels=3,
+                out_channels=128,
+                head_num=4,
+                mlp_dim=512,
+                block_num=3,
+                patch_size=4,
+                class_num=1)
 
-    print(sum(p.numel() for p in UNetr.parameters()))
-    print(UNetr(torch.randn(1, 3, 512, 512)).shape)
+    print(sum(p.numel() for p in unetr.parameters()))
+    print(unetr(torch.randn(1, 3, 512, 512)).shape)
+    
+    from calflops import calculate_flops
+    batch_size = 1
+    input_shape = (batch_size, 3, 512, 512)
+    flops, macs, params = calculate_flops(model=unetr, 
+                                        input_shape=input_shape,
+                                        output_as_string=True,
+                                        output_precision=4)
+    print("Unetr FLOPs:%s   MACs:%s   Params:%s \n" %(flops, macs, params))
