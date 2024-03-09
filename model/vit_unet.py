@@ -59,7 +59,7 @@ class DecoderBottleneck(nn.Module):
 
 
 class Encoder(nn.Module):
-    def __init__(self, img_dim, in_channels, embedding_dim, head_num, mlp_dim, block_num, patch_size,
+    def __init__(self, img_dim, tokens, in_channels, embedding_dim, head_num, mlp_dim, block_num, patch_size,
                  classification=True, num_classes=1):
         super().__init__()
 
@@ -72,7 +72,7 @@ class Encoder(nn.Module):
         self.relu = nn.ReLU(inplace=True)
         
         # temp
-        self.token_dim = 512
+        self.token_dim = tokens
         self.vit_img_dim = int(math.sqrt(self.token_dim)) + 1
         self.cls_token = nn.Parameter(torch.randn(1, 1, embedding_dim*4))
         
@@ -144,10 +144,10 @@ class Decoder(nn.Module):
 
 
 class ViTUNet(nn.Module):
-    def __init__(self, img_dim, in_channels, out_channels, head_num, mlp_dim, block_num, patch_size, class_num):
+    def __init__(self, img_dim, tokens, in_channels, out_channels, head_num, mlp_dim, block_num, patch_size, class_num):
         super().__init__()
 
-        self.encoder = Encoder(img_dim, in_channels, out_channels,
+        self.encoder = Encoder(img_dim, tokens, in_channels, out_channels,
                                head_num, mlp_dim, block_num, patch_size, classification=False, num_classes=1)
 
         self.decoder = Decoder(out_channels, class_num)
@@ -166,20 +166,21 @@ if __name__ == '__main__':
     import torch
 
     vitunet = ViTUNet(img_dim=512,
+                      tokens=2048,
                         in_channels=3,
                         out_channels=128,
                         head_num=4,
                         mlp_dim=512,
                         block_num=3,
-                        patch_size=8,
+                        patch_size=2,
                         class_num=1)
 
     print(sum(p.numel() for p in vitunet.parameters()))
-    print(vitunet(torch.randn(1, 3, 8, 4096)).shape)
+    print(vitunet(torch.randn(1, 3, 2, 4096)).shape)
     
     from calflops import calculate_flops
     batch_size = 1
-    input_shape = (batch_size, 3, 8, 4096)
+    input_shape = (batch_size, 3, 2, 4096)
     flops, macs, params = calculate_flops(model=vitunet, 
                                         input_shape=input_shape,
                                         output_as_string=True,

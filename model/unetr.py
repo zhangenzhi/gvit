@@ -172,7 +172,7 @@ if __name__ == '__main__':
                 head_num=4,
                 mlp_dim=512,
                 block_num=3,
-                patch_size=4,
+                patch_size=2,
                 class_num=1)
 
     print(sum(p.numel() for p in unetr.parameters()))

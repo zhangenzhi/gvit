@@ -34,6 +34,7 @@ def main(datapath, resolution, epoch, batch_size, savefile):
     # Create an instance of the U-Net model and other necessary components
     num_classes = 1
     unet_model = ViTUNet(img_dim=512,
+                        tokens=512,
                         in_channels=3,
                         out_channels=128,
                         head_num=4,
