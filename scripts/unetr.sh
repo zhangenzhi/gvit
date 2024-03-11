@@ -5,14 +5,14 @@
 #SBATCH -N 1
 #SBATCH -p batch
 
-# export PATH=$PWD/conda/bin:$PATH
-# eval "$($PWD/conda/bin/conda shell.bash hook)"
+export PATH=$PWD/../miniconda_frontier/condabin:$PATH
+eval "$($PWD/../miniconda_frontier/condabin/conda shell.bash hook)"
 
-# set +x
-# source ~/miniconda_frontier/etc/profile.d/conda.sh
-# conda activate /ccs/home/enzhi/miniconda_frontier/envs/gvit
+set +x
+source ~/miniconda_frontier/etc/profile.d/conda.sh
+conda activate /ccs/home/enzhi/miniconda_frontier/envs/gvit
 
-source activate gvit
+# source activate gvit
 
 export LD_PRELOAD="/usr/lib64/libcrypto.so /usr/lib64/libssh.so.4 /usr/lib64/libssl.so.1.1"
 
