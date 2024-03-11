@@ -98,7 +98,7 @@ def count_info(qdt:QuadTree):
     return patch_info
 
 # save patch sequence
-def compress_mix_patches(qdt:QuadTree, img: np.array, to_size:tuple=(8,8,3), target_length = 512):
+def compress_mix_patches(qdt:QuadTree, img: np.array, to_size:tuple=(8,8,3), target_length = 576):
     
     seq_patches = qdt.serialize(img)
     patch_info = {}
@@ -128,7 +128,7 @@ def compress_mix_patches(qdt:QuadTree, img: np.array, to_size:tuple=(8,8,3), tar
         
     return seq_patches, to_size, patch_info
 
-def paip_patchify(base, split_value:int, max_depth:int, resolution: int, to_size:tuple=(8,8,3)):
+def paip_patchify(base, split_value:int, max_depth:int, resolution: int, target_length:int=576, to_size:tuple=(8,8,3)):
     img_path = get_png_path(base=base, resolution=resolution)
     output_dir = base
     os.makedirs(output_dir, exist_ok=True)
@@ -138,7 +138,7 @@ def paip_patchify(base, split_value:int, max_depth:int, resolution: int, to_size
         img = cv.imread(p)
         img, edge = transform(img, dsize=(resolution, resolution))
         qdt = QuadTree(domain=edge, max_value=split_value, max_depth = max_depth)
-        seq_patches, patch_size, patch_info = compress_mix_patches(qdt, img, to_size)
+        seq_patches, patch_size, patch_info = compress_mix_patches(qdt, img, to_size, target_length)
         seq_img = np.asarray(seq_patches)
         seq_img = np.reshape(seq_img, [patch_size[0], -1, patch_size[2]])
         name = Path(p).parts[-2]
@@ -181,7 +181,8 @@ if __name__ == '__main__':
     parser.add_argument('--dataset', type=str,  default="paip", help='name of the dataset.')
     parser.add_argument('--resolution', type=int, default=512, help='resolution of the img.')
     parser.add_argument('--max_depth', type=int, default=10, help='path of the dataset.')
-    parser.add_argument('--split_value', type=int, default=20, help='path of the dataset.')
+    parser.add_argument('--target_length', type=int, default=576, help='path of the dataset.')
+    parser.add_argument('--split_value', type=int, default=80, help='criteron value to subdivision.')
     parser.add_argument('--datapath',  type=str, default="/Volumes/data/dataset/paip/output_images_and_masks", 
                         help='base path of dataset.')
     args = parser.parse_args()
