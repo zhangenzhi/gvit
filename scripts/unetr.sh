@@ -14,7 +14,7 @@
 
 conda activate gvit
 
-# export LD_PRELOAD="/usr/lib64/libcrypto.so /usr/lib64/libssh.so.4 /usr/lib64/libssl.so.1.1"
+export LD_PRELOAD="/usr/lib64/libcrypto.so /usr/lib64/libssh.so.4 /usr/lib64/libssl.so.1.1"
 
 module load PrgEnv-cray/8.3.3
 # module load gcc/12.2.0
