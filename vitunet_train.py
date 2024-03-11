@@ -78,10 +78,10 @@ def main(datapath, resolution, epoch, batch_size, savefile):
 
         for batch in train_loader:
             images, qdts, masks = batch
-            qdts, masks = qdts.to(device), masks.to(device)  # Move data to GPU
+            images, qdts, masks = images.to(device), qdts.to(device), masks.to(device)  # Move data to GPU
             optimizer.zero_grad()
 
-            outputs = unet_model(qdts)
+            outputs = unet_model(qdts, images)
             loss = criterion(outputs, masks)
             loss.backward()
             optimizer.step()
@@ -98,8 +98,8 @@ def main(datapath, resolution, epoch, batch_size, savefile):
         with torch.no_grad():
             for batch in val_loader:
                 images, qdts, masks = batch
-                qdts, masks = qdts.to(device), masks.to(device)  # Move data to GPU
-                outputs = unet_model(qdts)
+                images, qdts, masks = images.to(device), qdts.to(device), masks.to(device)  # Move data to GPU
+                outputs = unet_model(qdts, images)
                 loss = criterion(outputs, masks)
                 epoch_val_loss += loss.item()
 
@@ -113,8 +113,8 @@ def main(datapath, resolution, epoch, batch_size, savefile):
             unet_model.eval()
             with torch.no_grad():
                 sample_images, sample_qdts, sample_masks = next(iter(val_loader))
-                sample_qdts, sample_masks = sample_qdts.to(device), sample_masks.to(device)  # Move data to GPU
-                sample_outputs = torch.sigmoid(unet_model(sample_qdts))
+                sample_images, sample_qdts, sample_masks = sample_images.to(device), sample_qdts.to(device), sample_masks.to(device)  # Move data to GPU
+                sample_outputs = torch.sigmoid(unet_model(sample_qdts, sample_images))
 
                 for i in range(sample_images.size(0)):
                     image = sample_images[i].cpu().permute(1, 2, 0).numpy()

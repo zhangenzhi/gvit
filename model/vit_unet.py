@@ -151,12 +151,21 @@ class ViTUNet(nn.Module):
                                head_num, mlp_dim, block_num, patch_size, classification=False, num_classes=1)
 
         self.decoder = Decoder(out_channels, class_num)
+        self.conv0 = nn.Conv2d(in_channels=3, out_channels=63, kernel_size=3, padding=1)
+        self.vit_img_dim = int(math.sqrt(tokens)) + 1
+        self.trans0= nn.Upsample(size=(self.vit_img_dim*16, self.vit_img_dim*16), mode='bilinear', align_corners=True)
+        self.conv1 = nn.Conv2d(in_channels=64, out_channels=1, kernel_size=3, padding=1)
         self.img_dim = img_dim
         self.upsampling = nn.Upsample(size=(self.img_dim, self.img_dim), mode='bilinear', align_corners=True)
 
-    def forward(self, x):
+    def forward(self, x, img):
         x, x1, x2, x3 = self.encoder(x)
         x = self.decoder(x, x1, x2, x3)
+        if img!=None:
+            img = self.trans0(img)
+            img = self.conv0(img)
+            x = torch.concat([x, img], dim=1)
+            x = self.conv1(x)
         x = self.upsampling(x)
      
         return x
