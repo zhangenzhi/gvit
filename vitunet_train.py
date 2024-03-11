@@ -152,9 +152,9 @@ def main(datapath, resolution, epoch, batch_size, savefile):
 
     with torch.no_grad():
         for batch in test_loader:
-            _, qdts, masks = batch
-            qdts, masks = qdts.to(device), masks.to(device)  # Move data to GPU
-            outputs = unet_model(qdts)
+            images, qdts, masks = batch
+            images, qdts, masks = images.to(device), qdts.to(device), masks.to(device)  # Move data to GPU
+            outputs = unet_model(qdts, images)
             loss = criterion(outputs, masks)
             test_loss += loss.item()
 
