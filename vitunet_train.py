@@ -14,7 +14,6 @@ import matplotlib.pyplot as plt
 
 from model.vit_unet import ViTUNet
 from dataloader.paip_qdt import PAIQDTDataset
-from dataloader.paip_dataset import PAIPDataset
 
 # Define the Dice Loss
 class DiceLoss(nn.Module):
