@@ -51,7 +51,7 @@ def main(datapath, resolution, epoch, batch_size, savefile):
     data_path = datapath
 
     # dataset = PAIQDTDataset(data_path, resolution,  normalize=True)
-    dataset = PAIPDataset(data_path, resolution,  normalize=True)
+    dataset = PAIPDataset(data_path, resolution, normalize=True)
     dataset_size = len(dataset)
     train_size = int(0.7 * dataset_size)
     val_size = (dataset_size - train_size) // 2
@@ -75,11 +75,11 @@ def main(datapath, resolution, epoch, batch_size, savefile):
         epoch_train_loss = 0.0
 
         for batch in train_loader:
-            images, qdts, masks = batch
-            qdts, masks = qdts.to(device), masks.to(device)  # Move data to GPU
+            images, timg, masks = batch
+            timg, masks = timg.to(device), masks.to(device)  # Move data to GPU
             optimizer.zero_grad()
 
-            outputs = unet_model(qdts)
+            outputs = unet_model(timg)
             loss = criterion(outputs, masks)
             loss.backward()
             optimizer.step()
@@ -95,9 +95,9 @@ def main(datapath, resolution, epoch, batch_size, savefile):
 
         with torch.no_grad():
             for batch in val_loader:
-                images, qdts, masks = batch
-                qdts, masks = qdts.to(device), masks.to(device)  # Move data to GPU
-                outputs = unet_model(qdts)
+                images, timg, masks = batch
+                timg, masks = timg.to(device), masks.to(device)  # Move data to GPU
+                outputs = unet_model(timg)
                 loss = criterion(outputs, masks)
                 epoch_val_loss += loss.item()
 
@@ -110,9 +110,9 @@ def main(datapath, resolution, epoch, batch_size, savefile):
         if (epoch + 1) % 3 == 0:  # Adjust the frequency of visualization
             unet_model.eval()
             with torch.no_grad():
-                sample_images, sample_qdts, sample_masks = next(iter(val_loader))
-                sample_qdts, sample_masks = sample_qdts.to(device), sample_masks.to(device)  # Move data to GPU
-                sample_outputs = torch.sigmoid(unet_model(sample_qdts))
+                sample_images, sample_timg, sample_masks = next(iter(val_loader))
+                sample_timg, sample_masks = sample_timg.to(device), sample_masks.to(device)  # Move data to GPU
+                sample_outputs = torch.sigmoid(unet_model(sample_timg))
 
                 for i in range(sample_images.size(0)):
                     image = sample_images[i].cpu().permute(1, 2, 0).numpy()
