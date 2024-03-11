@@ -12,7 +12,8 @@ from torch.utils.data import DataLoader
 import numpy as np
 import matplotlib.pyplot as plt
 
-from model.unetr import UNetr
+# from model.unetr import UNetr
+from model.unetr2d import UNETR
 from dataloader.paip_dataset import PAIPDataset
 
 # Define the Dice Loss
@@ -32,14 +33,21 @@ class DiceLoss(nn.Module):
 def main(datapath, resolution, epoch, batch_size, savefile):
     # Create an instance of the U-Net model and other necessary components
     num_classes = 1
-    unet_model = UNetr(img_dim=512,
-                        in_channels=3,
-                        out_channels=128,
-                        head_num=4,
-                        mlp_dim=512,
-                        block_num=3,
-                        patch_size=16,
-                        class_num=num_classes)
+    # unet_model = UNetr(img_dim=512,
+    #                     in_channels=3,
+    #                     out_channels=128,
+    #                     head_num=4,
+    #                     mlp_dim=512,
+    #                     block_num=3,
+    #                     patch_size=16,
+    #                     class_num=num_classes)
+    unet_model = UNETR(img_shape=(512,512), 
+                  input_dim=3, 
+                  output_dim=1, 
+                  embed_dim=768,
+                  patch_size=16,
+                  num_heads=12, 
+                  dropout=0.1)
     device = torch.device("cuda" if torch.cuda.is_available() else "mps")
     
     # Move the model to GPU
