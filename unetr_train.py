@@ -35,7 +35,7 @@ def main(datapath, resolution, epoch, batch_size, savefile):
     num_classes = 1
     unet_model = UNETR(img_shape=(512,512), 
                   input_dim=3, 
-                  output_dim=1, 
+                  output_dim=num_classes, 
                   embed_dim=768,
                   patch_size=16,
                   num_heads=12, 

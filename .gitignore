@@ -4,3 +4,4 @@ __pycache__
 *.pth
 visualizations
 .DS_Store
+*_visual

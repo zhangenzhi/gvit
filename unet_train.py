@@ -8,6 +8,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import random_split
 from torch.utils.data import DataLoader
+import torch.nn.functional as F
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -28,10 +29,30 @@ class DiceLoss(nn.Module):
         loss = 1.0 - dice_coefficient  # Adjusted to ensure non-negative loss
         return loss
     
+class DiceBCELoss(nn.Module):
+    def __init__(self, weight=None, size_average=True):
+        super(DiceBCELoss, self).__init__()
+
+    def forward(self, inputs, targets, smooth=1):
+        
+        #comment out if your model contains a sigmoid or equivalent activation layer
+        inputs = F.sigmoid(inputs)       
+        
+        #flatten label and prediction tensors
+        inputs = inputs.view(-1)
+        targets = targets.view(-1)
+        
+        intersection = (inputs * targets).sum()                            
+        dice_loss = 1 - (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)  
+        BCE = F.binary_cross_entropy(inputs, targets, reduction='mean')
+        Dice_BCE = BCE + dice_loss
+        
+        return Dice_BCE
+    
 def main(datapath, resolution, epoch, batch_size, savefile):
     # Create an instance of the U-Net model and other necessary components
     unet_model = Unet(n_class=1)
-    criterion = DiceLoss()
+    criterion = DiceBCELoss()
     optimizer = optim.Adam(unet_model.parameters(), lr=0.001)
     device = torch.device("cuda" if torch.cuda.is_available() else "mps")
     # Move the model to GPU
@@ -141,9 +162,9 @@ def main(datapath, resolution, epoch, batch_size, savefile):
 
     with torch.no_grad():
         for batch in test_loader:
-            images, masks = batch
-            images, masks = images.to(device), masks.to(device)  # Move data to GPU
-            outputs = unet_model(images)
+            images, timg, masks = batch
+            timg, masks = timg.to(device), masks.to(device)  # Move data to GPU
+            outputs = unet_model(timg)
             loss = criterion(outputs, masks)
             test_loss += loss.item()
 
