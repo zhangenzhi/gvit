@@ -54,10 +54,10 @@ def main(datapath, resolution, epoch, batch_size, savefile):
     test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False)
 
     # Training loop
-    num_epochs = 200
+    num_epochs = epoch
     train_losses = []
     val_losses = []
-    output_dir = "./visualizations"  # Change this to the desired directory
+    output_dir = savefile  # Change this to the desired directory
     os.makedirs(output_dir, exist_ok=True)
     
     for epoch in range(num_epochs):
