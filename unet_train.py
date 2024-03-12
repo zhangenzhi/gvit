@@ -30,8 +30,9 @@ class DiceLoss(nn.Module):
         return loss
     
 class DiceBCELoss(nn.Module):
-    def __init__(self, weight=None, size_average=True):
+    def __init__(self, weight=0.5, size_average=True):
         super(DiceBCELoss, self).__init__()
+        self.weight = weight
 
     def forward(self, inputs, targets, smooth=1):
         
@@ -45,13 +46,13 @@ class DiceBCELoss(nn.Module):
         intersection = (inputs * targets).sum()                            
         dice_loss = 1 - (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)  
         BCE = F.binary_cross_entropy(inputs, targets, reduction='mean')
-        Dice_BCE = BCE + dice_loss
+        Dice_BCE = self.weight*BCE + (1-self.weight)*dice_loss
         
         return Dice_BCE
     
 def main(datapath, resolution, epoch, batch_size, savefile):
     # Create an instance of the U-Net model and other necessary components
-    unet_model = Unet(n_class=1)
+    unet_model = Unet(n_class=2)
     criterion = DiceBCELoss()
     optimizer = optim.Adam(unet_model.parameters(), lr=0.001)
     device = torch.device("cuda" if torch.cuda.is_available() else "mps")
@@ -60,8 +61,6 @@ def main(datapath, resolution, epoch, batch_size, savefile):
     
     # Split the dataset into train, validation, and test sets
     data_path = datapath
-    resolution = resolution
-    batch_size = batch_size
     dataset = PAIPDataset(data_path, resolution, normalize=False)
     dataset_size = len(dataset)
     train_size = int(0.7 * dataset_size)
