@@ -52,8 +52,8 @@ class DiceBCELoss(nn.Module):
     
 def main(datapath, resolution, epoch, batch_size, savefile):
     # Create an instance of the U-Net model and other necessary components
-    unet_model = Unet(n_class=1)
-    criterion = DiceBCELoss()
+    unet_model = Unet(n_class=2)
+    criterion = DiceLoss()
     optimizer = optim.Adam(unet_model.parameters(), lr=0.001)
     device = torch.device("cuda" if torch.cuda.is_available() else "mps")
     # Move the model to GPU

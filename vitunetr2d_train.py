@@ -53,11 +53,11 @@ class DiceBCELoss(nn.Module):
     
 def main(datapath, resolution, epoch, batch_size, savefile):
     # Create an instance of the U-Net model and other necessary components
-    num_classes = 1
-    unet_model = VITUNETR(img_shape=(512,512), 
+    num_classes = 2
+    unet_model = DiceLoss(img_shape=(512,512), 
                 qdt_shape=(8,4608),
                 input_dim=3, 
-                output_dim=1, 
+                output_dim=num_classes, 
                 embed_dim=768,
                 patch_size=8,
                 num_heads=12, 
