@@ -9,6 +9,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import random_split
 from torch.utils.data import DataLoader
+import torch.nn.functional as F
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -30,6 +31,27 @@ class DiceLoss(nn.Module):
         loss = 1.0 - dice_coefficient  # Adjusted to ensure non-negative loss
         return loss
 
+class DiceBCELoss(nn.Module):
+    def __init__(self, weight=0.5, size_average=True):
+        super(DiceBCELoss, self).__init__()
+        self.weight = weight
+
+    def forward(self, inputs, targets, smooth=1):
+        
+        #comment out if your model contains a sigmoid or equivalent activation layer
+        inputs = F.sigmoid(inputs)       
+        
+        #flatten label and prediction tensors
+        inputs = inputs.view(-1)
+        targets = targets.view(-1)
+        
+        intersection = (inputs * targets).sum()                            
+        dice_loss = 1 - (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)  
+        BCE = F.binary_cross_entropy(inputs, targets, reduction='mean')
+        Dice_BCE = self.weight*BCE + (1-self.weight)*dice_loss
+        
+        return Dice_BCE
+    
 def main(datapath, resolution, epoch, batch_size, savefile):
     # Create an instance of the U-Net model and other necessary components
     num_classes = 1
@@ -44,7 +66,7 @@ def main(datapath, resolution, epoch, batch_size, savefile):
     
     # Move the model to GPU
     unet_model.to(device)
-    criterion = DiceLoss()
+    criterion = DiceBCELoss()
     optimizer = optim.Adam(unet_model.parameters(), lr=0.001)
 
     # Split the dataset into train, validation, and test sets
