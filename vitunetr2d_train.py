@@ -114,16 +114,16 @@ def main(datapath, resolution, epoch, batch_size, savefile):
 
             epoch_train_loss += loss.item()
 
-            # Calculate Dice score during training
-            predicted_masks = torch.sigmoid(outputs)
-            dice_score = calculate_dice_score(predicted_masks, masks)
-            epoch_dice_train += dice_score
+            # # Calculate Dice score during training
+            # predicted_masks = torch.sigmoid(outputs)
+            # dice_score = calculate_dice_score(predicted_masks, masks)
+            # epoch_dice_train += dice_score
 
         epoch_train_loss /= len(train_loader)
         train_losses.append(epoch_train_loss)
 
-        epoch_dice_train /= len(train_loader)
-        dice_scores_train.append(epoch_dice_train)
+        # epoch_dice_train /= len(train_loader)
+        # dice_scores_train.append(epoch_dice_train)
 
         # Validation
         unet_model.eval()
@@ -138,16 +138,16 @@ def main(datapath, resolution, epoch, batch_size, savefile):
                 loss = criterion(outputs, masks)
                 epoch_val_loss += loss.item()
 
-                # Calculate Dice score during validation
-                predicted_masks = torch.sigmoid(outputs)
-                dice_score = calculate_dice_score(predicted_masks, masks)
-                epoch_dice_val += dice_score
+                # # Calculate Dice score during validation
+                # predicted_masks = torch.sigmoid(outputs)
+                # dice_score = calculate_dice_score(predicted_masks, masks)
+                # epoch_dice_val += dice_score
 
         epoch_val_loss /= len(val_loader)
         val_losses.append(epoch_val_loss)
 
-        epoch_dice_val /= len(val_loader)
-        dice_scores_val.append(epoch_dice_val)
+        # epoch_dice_val /= len(val_loader)
+        # dice_scores_val.append(epoch_dice_val)
 
         print(f"Epoch [{epoch + 1}/{num_epochs}] - Train Loss: {epoch_train_loss:.4f}, Validation Loss: {epoch_val_loss:.4f}")
 
@@ -190,11 +190,11 @@ def main(datapath, resolution, epoch, batch_size, savefile):
     torch.save(train_losses, train_losses_path)
     torch.save(val_losses, val_losses_path)
 
-    # Save Dice scores during training and validation
-    dice_scores_train_path = os.path.join(output_dir, 'dice_scores_train.pth')
-    dice_scores_val_path = os.path.join(output_dir, 'dice_scores_val.pth')
-    torch.save(dice_scores_train, dice_scores_train_path)
-    torch.save(dice_scores_val, dice_scores_val_path)
+    # # Save Dice scores during training and validation
+    # dice_scores_train_path = os.path.join(output_dir, 'dice_scores_train.pth')
+    # dice_scores_val_path = os.path.join(output_dir, 'dice_scores_val.pth')
+    # torch.save(dice_scores_train, dice_scores_train_path)
+    # torch.save(dice_scores_val, dice_scores_val_path)
 
     # Test the model
     unet_model.eval()
@@ -209,10 +209,10 @@ def main(datapath, resolution, epoch, batch_size, savefile):
             loss = criterion(outputs, masks)
             test_loss += loss.item()
 
-            # Calculate Dice score during testing
-            predicted_masks = torch.sigmoid(outputs)
-            dice_score = calculate_dice_score(predicted_masks, masks)
-            test_dice += dice_score
+            # # Calculate Dice score during testing
+            # predicted_masks = torch.sigmoid(outputs)
+            # dice_score = calculate_dice_score(predicted_masks, masks)
+            # test_dice += dice_score
 
     test_loss /= len(test_loader)
     print(f"Test Loss: {test_loss:.4f}")
