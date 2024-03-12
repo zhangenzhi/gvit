@@ -46,13 +46,13 @@ class DiceBCELoss(nn.Module):
         intersection = (inputs * targets).sum()                            
         dice_loss = 1 - (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)  
         BCE = F.binary_cross_entropy(inputs, targets, reduction='mean')
-        Dice_BCE = self.weight*BCE + (1-self.weight)*dice_loss
+        Dice_BCE = self.weight*BCE + self.weight*dice_loss
         
         return Dice_BCE
     
 def main(datapath, resolution, epoch, batch_size, savefile):
     # Create an instance of the U-Net model and other necessary components
-    unet_model = Unet(n_class=2)
+    unet_model = Unet(n_class=1)
     criterion = DiceBCELoss()
     optimizer = optim.Adam(unet_model.parameters(), lr=0.001)
     device = torch.device("cuda" if torch.cuda.is_available() else "mps")
