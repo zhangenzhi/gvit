@@ -9,6 +9,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import random_split
 from torch.utils.data import DataLoader
+import torch.nn.functional as F
 import numpy as np
 import matplotlib.pyplot as plt
 
