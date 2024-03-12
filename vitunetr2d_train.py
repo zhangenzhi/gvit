@@ -1,14 +1,11 @@
 import os
 import sys
-sys.path.append("./")
 import argparse
 from pathlib import Path
 import torch
-import torchvision
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import random_split
-from torch.utils.data import DataLoader
+from torch.utils.data import random_split, DataLoader
 import torch.nn.functional as F
 import numpy as np
 import matplotlib.pyplot as plt
@@ -30,49 +27,55 @@ class DiceLoss(nn.Module):
         loss = 1.0 - dice_coefficient  # Adjusted to ensure non-negative loss
         return loss
 
+def calculate_dice_score(predicted, target, smooth=1):
+    predicted = predicted.view(-1)
+    target = target.view(-1)
+    intersection = (predicted * target).sum()
+    dice_coefficient = (2 * intersection + smooth) / (predicted.sum() + target.sum() + smooth)
+    return dice_coefficient
+
 class DiceBCELoss(nn.Module):
     def __init__(self, weight=0.5, size_average=True):
         super(DiceBCELoss, self).__init__()
         self.weight = weight
 
     def forward(self, inputs, targets, smooth=1):
-        
-        #comment out if your model contains a sigmoid or equivalent activation layer
-        inputs = F.sigmoid(inputs)       
-        
-        #flatten label and prediction tensors
+        # Comment out if your model contains a sigmoid or equivalent activation layer
+        inputs = F.sigmoid(inputs)
+
+        # Flatten label and prediction tensors
         inputs = inputs.view(-1)
         targets = targets.view(-1)
-        
-        intersection = (inputs * targets).sum()                            
-        dice_loss = 1 - (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)  
+
+        intersection = (inputs * targets).sum()
+        dice_loss = 1 - (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)
         BCE = F.binary_cross_entropy(inputs, targets, reduction='mean')
         Dice_BCE = self.weight*BCE + (1-self.weight)*dice_loss
-        
+
         return Dice_BCE
-    
+
 def main(datapath, resolution, epoch, batch_size, savefile):
     # Create an instance of the U-Net model and other necessary components
-    num_classes = 2
-    unet_model = VITUNETR(img_shape=(512,512), 
-                qdt_shape=(8,4608),
-                input_dim=3, 
-                output_dim=num_classes, 
-                embed_dim=768,
-                patch_size=8,
-                num_heads=12, 
-                dropout=0.1)
-    device = torch.device("cuda" if torch.cuda.is_available() else "mps")
-    
+    num_classes = 1
+    unet_model = VITUNETR(img_shape=(512, 512),
+                          qdt_shape=(8, 4608),
+                          input_dim=3,
+                          output_dim=num_classes,
+                          embed_dim=768,
+                          patch_size=8,
+                          num_heads=12,
+                          dropout=0.1)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
     # Move the model to GPU
     unet_model.to(device)
-    criterion = DiceLoss()
+    criterion = DiceBCELoss()
     optimizer = optim.Adam(unet_model.parameters(), lr=0.001)
 
     # Split the dataset into train, validation, and test sets
     data_path = datapath
 
-    dataset = PAIQDTDataset(data_path, resolution,  normalize=True)
+    dataset = PAIQDTDataset(data_path, resolution, normalize=True)
 
     dataset_size = len(dataset)
     train_size = int(0.7 * dataset_size)
@@ -89,12 +92,15 @@ def main(datapath, resolution, epoch, batch_size, savefile):
     num_epochs = epoch
     train_losses = []
     val_losses = []
+    dice_scores_train = []  # to store Dice scores during training
+    dice_scores_val = []  # to store Dice scores during validation
     output_dir = savefile  # Change this to the desired directory
     os.makedirs(output_dir, exist_ok=True)
 
     for epoch in range(num_epochs):
         unet_model.train()
         epoch_train_loss = 0.0
+        epoch_dice_train = 0.0
 
         for batch in train_loader:
             images, qdts, masks = batch
@@ -108,12 +114,21 @@ def main(datapath, resolution, epoch, batch_size, savefile):
 
             epoch_train_loss += loss.item()
 
+            # Calculate Dice score during training
+            predicted_masks = torch.sigmoid(outputs)
+            dice_score = calculate_dice_score(predicted_masks, masks)
+            epoch_dice_train += dice_score
+
         epoch_train_loss /= len(train_loader)
         train_losses.append(epoch_train_loss)
+
+        epoch_dice_train /= len(train_loader)
+        dice_scores_train.append(epoch_dice_train)
 
         # Validation
         unet_model.eval()
         epoch_val_loss = 0.0
+        epoch_dice_val = 0.0
 
         with torch.no_grad():
             for batch in val_loader:
@@ -123,8 +138,16 @@ def main(datapath, resolution, epoch, batch_size, savefile):
                 loss = criterion(outputs, masks)
                 epoch_val_loss += loss.item()
 
+                # Calculate Dice score during validation
+                predicted_masks = torch.sigmoid(outputs)
+                dice_score = calculate_dice_score(predicted_masks, masks)
+                epoch_dice_val += dice_score
+
         epoch_val_loss /= len(val_loader)
         val_losses.append(epoch_val_loss)
+
+        epoch_dice_val /= len(val_loader)
+        dice_scores_val.append(epoch_dice_val)
 
         print(f"Epoch [{epoch + 1}/{num_epochs}] - Train Loss: {epoch_train_loss:.4f}, Validation Loss: {epoch_val_loss:.4f}")
 
@@ -140,7 +163,7 @@ def main(datapath, resolution, epoch, batch_size, savefile):
                     image = sample_images[i].cpu().permute(1, 2, 0).numpy()
                     mask_true = sample_masks[i].cpu().numpy()
                     mask_pred = (sample_outputs[i, 0].cpu() > 0.5).numpy()
-                    
+
                     # Squeeze the singleton dimension from mask_true
                     mask_true = np.squeeze(mask_true, axis=0)
 
@@ -167,9 +190,16 @@ def main(datapath, resolution, epoch, batch_size, savefile):
     torch.save(train_losses, train_losses_path)
     torch.save(val_losses, val_losses_path)
 
+    # Save Dice scores during training and validation
+    dice_scores_train_path = os.path.join(output_dir, 'dice_scores_train.pth')
+    dice_scores_val_path = os.path.join(output_dir, 'dice_scores_val.pth')
+    torch.save(dice_scores_train, dice_scores_train_path)
+    torch.save(dice_scores_val, dice_scores_val_path)
+
     # Test the model
     unet_model.eval()
     test_loss = 0.0
+    test_dice = 0.0
 
     with torch.no_grad():
         for batch in test_loader:
@@ -179,10 +209,19 @@ def main(datapath, resolution, epoch, batch_size, savefile):
             loss = criterion(outputs, masks)
             test_loss += loss.item()
 
+            # Calculate Dice score during testing
+            predicted_masks = torch.sigmoid(outputs)
+            dice_score = calculate_dice_score(predicted_masks, masks)
+            test_dice += dice_score
+
     test_loss /= len(test_loader)
     print(f"Test Loss: {test_loss:.4f}")
-    
+
+    test_dice /= len(test_loader)
+    print(f"Test Dice Score: {test_dice:.4f}")
+
     draw_loss(output_dir=output_dir)
+
 
 def draw_loss(output_dir):
     os.makedirs(output_dir, exist_ok=True)
