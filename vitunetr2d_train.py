@@ -54,7 +54,7 @@ class DiceBCELoss(nn.Module):
 def main(datapath, resolution, epoch, batch_size, savefile):
     # Create an instance of the U-Net model and other necessary components
     num_classes = 2
-    unet_model = DiceLoss(img_shape=(512,512), 
+    unet_model = VITUNETR(img_shape=(512,512), 
                 qdt_shape=(8,4608),
                 input_dim=3, 
                 output_dim=num_classes, 
@@ -66,7 +66,7 @@ def main(datapath, resolution, epoch, batch_size, savefile):
     
     # Move the model to GPU
     unet_model.to(device)
-    criterion = DiceBCELoss()
+    criterion = DiceLoss()
     optimizer = optim.Adam(unet_model.parameters(), lr=0.001)
 
     # Split the dataset into train, validation, and test sets

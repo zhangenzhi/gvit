@@ -27,5 +27,5 @@ python3 vitunetr2d_train.py \
         --datapath=./dataset/paip/output_images_and_masks \
         --resolution=512 \
         --epoch=100 \
-        --batch_size=16 \
+        --batch_size=8 \
         --savefile=./vitunetr2d_visual
