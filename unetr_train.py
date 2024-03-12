@@ -33,14 +33,6 @@ class DiceLoss(nn.Module):
 def main(datapath, resolution, epoch, batch_size, savefile):
     # Create an instance of the U-Net model and other necessary components
     num_classes = 1
-    # unet_model = UNetr(img_dim=512,
-    #                     in_channels=3,
-    #                     out_channels=128,
-    #                     head_num=4,
-    #                     mlp_dim=512,
-    #                     block_num=3,
-    #                     patch_size=16,
-    #                     class_num=num_classes)
     unet_model = UNETR(img_shape=(512,512), 
                   input_dim=3, 
                   output_dim=1, 

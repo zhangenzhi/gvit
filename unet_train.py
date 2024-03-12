@@ -1,6 +1,9 @@
 import os
+import sys
+sys.path.append("./")
+import argparse
+from pathlib import Path
 import torch
-import torchvision
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import random_split
@@ -8,62 +11,8 @@ from torch.utils.data import DataLoader
 import numpy as np
 import matplotlib.pyplot as plt
 
+from model.unet import Unet
 from dataloader.paip_dataset import PAIPDataset
-
-
-class Decoder(nn.Module):
-    def __init__(self, in_channels, middle_channels, out_channels):
-        super(Decoder, self).__init__()
-        self.up = nn.ConvTranspose2d(in_channels, out_channels, kernel_size=2, stride=2)
-        self.conv_relu = nn.Sequential(
-            nn.Conv2d(middle_channels, out_channels, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True)
-        )
-
-    def forward(self, x1, x2):
-        x1 = self.up(x1)
-        x1 = torch.cat((x1, x2), dim=1)
-        x1 = self.conv_relu(x1)
-        return x1
-
-class Unet(nn.Module):
-    def __init__(self, n_class):
-        super().__init__()
-
-        self.base_model = torchvision.models.resnet18(True)
-        self.base_layers = list(self.base_model.children())
-        self.layer1 = nn.Sequential(
-            nn.Conv2d(3, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False),
-            self.base_layers[1],
-            self.base_layers[2])
-        self.layer2 = nn.Sequential(*self.base_layers[3:5])
-        self.layer3 = self.base_layers[5]
-        self.layer4 = self.base_layers[6]
-        self.layer5 = self.base_layers[7]
-        self.decode4 = Decoder(512, 256+256, 256)
-        self.decode3 = Decoder(256, 256+128, 256)
-        self.decode2 = Decoder(256, 128+64, 128)
-        self.decode1 = Decoder(128, 64+64, 64)
-        self.decode0 = nn.Sequential(
-            nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True),
-            nn.Conv2d(64, 32, kernel_size=3, padding=1, bias=False),
-            nn.Conv2d(32, 64, kernel_size=3, padding=1, bias=False)
-        )
-        self.conv_last = nn.Conv2d(64, n_class, 1)
-
-    def forward(self, input):
-        e1 = self.layer1(input)  # 64,256,256
-        e2 = self.layer2(e1)     # 64,128,128
-        e3 = self.layer3(e2)     # 128,64,64
-        e4 = self.layer4(e3)     # 256,32,32
-        f = self.layer5(e4)      # 512,16,16
-        d4 = self.decode4(f, e4) # 256,32,32
-        d3 = self.decode3(d4, e3) # 256,64,64
-        d2 = self.decode2(d3, e2) # 128,128,128
-        d1 = self.decode1(d2, e1) # 64,256,256
-        d0 = self.decode0(d1)     # 64,512,512
-        out = self.conv_last(d0)  # 1,512,512
-        return out
 
 # Define the Dice Loss
 class DiceLoss(nn.Module):
@@ -79,7 +28,7 @@ class DiceLoss(nn.Module):
         loss = 1.0 - dice_coefficient  # Adjusted to ensure non-negative loss
         return loss
     
-def main():
+def main(datapath, resolution, epoch, batch_size, savefile):
     # Create an instance of the U-Net model and other necessary components
     unet_model = Unet(n_class=1)
     criterion = DiceLoss()
@@ -89,9 +38,9 @@ def main():
     unet_model.to(device)
     
     # Split the dataset into train, validation, and test sets
-    data_path = "/Volumes/data/dataset/paip/output_images_and_masks"
-    resolution = 512
-    batch_size = 16
+    data_path = datapath
+    resolution = resolution
+    batch_size = batch_size
     dataset = PAIPDataset(data_path, resolution, normalize=False)
     dataset_size = len(dataset)
     train_size = int(0.7 * dataset_size)
@@ -116,11 +65,11 @@ def main():
         epoch_train_loss = 0.0
 
         for batch in train_loader:
-            images, masks = batch
-            images, masks = images.to(device), masks.to(device)  # Move data to GPU
+            images, timg, masks = batch
+            timg, masks = timg.to(device), masks.to(device)  # Move data to GPU
             optimizer.zero_grad()
 
-            outputs = unet_model(images)
+            outputs = unet_model(timg)
             loss = criterion(outputs, masks)
             loss.backward()
             optimizer.step()
@@ -136,9 +85,9 @@ def main():
 
         with torch.no_grad():
             for batch in val_loader:
-                images, masks = batch
-                images, masks = images.to(device), masks.to(device)  # Move data to GPU
-                outputs = unet_model(images)
+                images, timg, masks = batch
+                timg, masks = timg.to(device), masks.to(device)  # Move data to GPU
+                outputs = unet_model(timg)
                 loss = criterion(outputs, masks)
                 epoch_val_loss += loss.item()
 
@@ -151,9 +100,9 @@ def main():
         if (epoch + 1) % 3 == 0:  # Adjust the frequency of visualization
             unet_model.eval()
             with torch.no_grad():
-                sample_images, sample_masks = next(iter(val_loader))
-                sample_images, sample_masks = sample_images.to(device), sample_masks.to(device)  # Move data to GPU
-                sample_outputs = torch.sigmoid(unet_model(sample_images))
+                sample_images, sample_timg, sample_masks = next(iter(val_loader))
+                sample_timg, sample_masks = sample_timg.to(device), sample_masks.to(device)  # Move data to GPU
+                sample_outputs = torch.sigmoid(unet_model(sample_timg))
 
                 for i in range(sample_images.size(0)):
                     image = sample_images[i].cpu().permute(1, 2, 0).numpy()
@@ -202,8 +151,7 @@ def main():
     print(f"Test Loss: {test_loss:.4f}")
     draw_loss(output_dir=output_dir)
 
-def draw_loss(output_dir="./visualizations"):
-    output_dir = output_dir  # Change this to the desired directory
+def draw_loss(output_dir):
     os.makedirs(output_dir, exist_ok=True)
     
     # Load saved losses
@@ -225,6 +173,23 @@ def draw_loss(output_dir="./visualizations"):
     plt.savefig(os.path.join(output_dir, f"train_val_loss.png"))
     plt.close()
     
-if __name__ == "__main__":
-    main()
-    # draw_loss()
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset', type=str,  default="paip", help='name of the dataset.')
+    parser.add_argument('--datapath', default="/Volumes/data/dataset/paip/output_images_and_masks", 
+                        help='base path of dataset.')
+    parser.add_argument('--resolution', default=512, type=int,
+                        help='resolution of img.')
+    parser.add_argument('--epoch', default=10, type=int,
+                        help='Epoch of training.')
+    parser.add_argument('--batch_size', default=2, type=int,
+                        help='Batch_size for training')
+    parser.add_argument('--savefile', default="./vitunet_visual",
+                        help='save visualized and loss filename')
+    args = parser.parse_args()
+
+    main(datapath=Path(args.datapath), 
+         resolution=args.resolution,
+         epoch=args.epoch,
+         batch_size=args.batch_size,
+         savefile=args.savefile)
