@@ -273,6 +273,6 @@ if __name__ == '__main__':
          resolution=args.resolution,
          epoch=args.epoch,
          batch_size=args.batch_size,
-         batch_size=args.tokens,
+         tokens=args.tokens,
          savefile=args.savefile)
     # draw_loss(args.savefile)
