@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -A bif146
 #SBATCH -o vitunetr2d.o%J
-#SBATCH -t 02:00:00
+#SBATCH -t 16:00:00
 #SBATCH -N 1
 #SBATCH -p batch
 
@@ -27,12 +27,12 @@ module load rocm/5.7.0
 # nnodes=${#nodes[@]}
 
 # exec
-srun -n 1 --ntasks-per-node=1 -c 1 python3 vitunetr2d_train.py \
-        --datapath=./dataset/paip/output_images_and_masks \
-        --resolution=512 \
-        --epoch=1000 \
-        --batch_size=4 \
-        --savefile=./vis_vitunet_lr
+# srun -n 1 --ntasks-per-node=1 -c 1 python3 vitunetr2d_train.py \
+#         --datapath=./dataset/paip/output_images_and_masks \
+#         --resolution=512 \
+#         --epoch=1000 \
+#         --batch_size=4 \
+#         --savefile=./vis_vitunet_lr
 
 srun -n 1 --ntasks-per-node=1 -c 1 python3 vitunetr2d_train.py \
         --datapath=./dataset/paip/output_images_and_masks \
