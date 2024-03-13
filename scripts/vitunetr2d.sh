@@ -32,4 +32,4 @@ srun -n 1 --ntasks-per-node=1 -c 1 python3 vitunetr2d_train.py \
         --resolution=512 \
         --epoch=1000 \
         --batch_size=4 \
-        --savefile=./vitunetr2d_visual
+        --savefile=./vis_vitunet_lr
