@@ -8,6 +8,10 @@
 # export PATH=$PWD/conda/bin:$PATH
 # eval "$($PWD/conda/bin/conda shell.bash hook)"
 
+export MIOPEN_DISABLE_CACHE=1 
+export MIOPEN_CUSTOM_CACHE_DIR='pwd' 
+export HOME="/tmp/srun"
+
 # set +x
 # source ~/miniconda_frontier/etc/profile.d/conda.sh
 # conda activate /ccs/home/enzhi/miniconda_frontier/envs/gvit
@@ -23,7 +27,7 @@ nodes=($(cat ${LSB_DJOB_HOSTFILE} | sort | uniq | grep -v login | grep -v batch)
 nnodes=${#nodes[@]}
 
 # exec
-python3 vitunetr2d_train.py \
+srun python3 vitunetr2d_train.py \
         --datapath=./dataset/paip/output_images_and_masks \
         --resolution=512 \
         --epoch=1000 \
