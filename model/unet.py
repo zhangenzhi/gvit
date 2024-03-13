@@ -61,3 +61,20 @@ class Unet(nn.Module):
         d0 = self.decode0(d1)     # 64,512,512
         out = self.conv_last(d0)  # 1,512,512
         return out
+    
+if __name__ == '__main__':
+    import torch
+
+    unetr = Unet(n_class=1)
+
+    print(sum(p.numel() for p in unetr.parameters()))
+    print(unetr(torch.randn(1, 3, 1024, 1024)).shape)
+    
+    from calflops import calculate_flops
+    batch_size = 1
+    input_shape = (batch_size, 3, 1024, 1024)
+    flops, macs, params = calculate_flops(model=unetr, 
+                                        input_shape=input_shape,
+                                        output_as_string=True,
+                                        output_precision=4)
+    print("Unetr FLOPs:%s   MACs:%s   Params:%s \n" %(flops, macs, params))

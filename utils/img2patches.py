@@ -29,7 +29,7 @@ def get_png_path(base, resolution):
                 
     return image_filenames
 
-def transform(img):
+def transform(img, resolution):
     res = cv.resize(img, dsize=(512, 512), interpolation=cv.INTER_CUBIC)
     grey_img = res[:, :, 0]
     blur = cv.GaussianBlur(grey_img, (3,3),0)
@@ -57,7 +57,7 @@ def paip_patchify(base,  resolution: int, to_size: tuple=(8,8,3)):
         
     for i,p in enumerate(img_path):
         img = cv.imread(p)
-        img, edge = transform(img)
+        img, edge = transform(img, resolution)
         qdt = QuadTree(domain=edge)
         seq_patches = compress_mix_patches(qdt, img, to_size)
         seq_img = np.asarray(seq_patches)
@@ -67,12 +67,27 @@ def paip_patchify(base,  resolution: int, to_size: tuple=(8,8,3)):
 
 
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset', type=str,  default="paip", help='name of the dataset.')
+    parser.add_argument('--datapath', default="/Volumes/data/dataset/paip/output_images_and_masks", 
+                        help='base path of dataset.')
+    parser.add_argument('--resolution', default=512, type=int,
+                        help='resolution of img.')
+    parser.add_argument('--epoch', default=10, type=int,
+                        help='Epoch of training.')
+    parser.add_argument('--batch_size', default=8, type=int,
+                        help='Batch_size for training')
+    parser.add_argument('--savefile', default="./vitunet_visual",
+                        help='save visualized and loss filename')
+    args = parser.parse_args()
     # Input directory paths
-    image_directory = "/Volumes/data/dataset/paip/output_images_and_masks/"
-    resolution = 512
-    dataset = "paip"
+    image_directory = args.datapath
+    resolution = args.resolution
+    dataset = args.dataset
+    
     if dataset == "paip":
-        paip_patchify(base=image_directory, resolution=512)
+        paip_patchify(base=image_directory, resolution=resolution)
         print("Patchify finished.")
     else:
         print("No such dataset.")

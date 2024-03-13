@@ -169,6 +169,7 @@ def patchify(args):
         paip_patchify(base=datapath, 
                       resolution=args.resolution,
                       split_value=args.split_value,
+                      target_length=args.target_length,
                       max_depth=args.max_depth)
     elif args.dataset == "btcv":
         pass
