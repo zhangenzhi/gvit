@@ -54,11 +54,11 @@ class DiceBCELoss(nn.Module):
 
         return Dice_BCE
 
-def main(datapath, resolution, epoch, batch_size, savefile):
+def main(datapath, resolution, tokens, epoch, batch_size, savefile):
     # Create an instance of the U-Net model and other necessary components
     num_classes = 1
-    unet_model = VITUNETR(img_shape=(512, 512),
-                          qdt_shape=(8, 4608),
+    unet_model = VITUNETR(img_shape=(resolution, resolution),
+                          qdt_shape=(8, int(8*tokens)),
                           input_dim=3,
                           output_dim=num_classes,
                           embed_dim=768,
@@ -259,6 +259,8 @@ if __name__ == '__main__':
                         help='base path of dataset.')
     parser.add_argument('--resolution', default=512, type=int,
                         help='resolution of img.')
+    parser.add_argument('--tokens', default=1024, type=int,
+                        help='resolution of img.')
     parser.add_argument('--epoch', default=10, type=int,
                         help='Epoch of training.')
     parser.add_argument('--batch_size', default=8, type=int,
@@ -271,5 +273,6 @@ if __name__ == '__main__':
          resolution=args.resolution,
          epoch=args.epoch,
          batch_size=args.batch_size,
+         batch_size=args.tokens,
          savefile=args.savefile)
     # draw_loss(args.savefile)
