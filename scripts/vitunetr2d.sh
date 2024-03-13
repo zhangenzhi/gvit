@@ -23,8 +23,8 @@ module load gcc/12.2.0
 module load rocm/5.7.0
 
 # grab nodecount
-nodes=($(cat ${LSB_DJOB_HOSTFILE} | sort | uniq | grep -v login | grep -v batch))
-nnodes=${#nodes[@]}
+# nodes=($(cat ${LSB_DJOB_HOSTFILE} | sort | uniq | grep -v login | grep -v batch))
+# nnodes=${#nodes[@]}
 
 # exec
 srun python3 vitunetr2d_train.py \
