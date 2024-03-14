@@ -25,4 +25,4 @@ srun -n 1 --ntasks-per-node=1 -c 1 python3 unetr_train.py \
         --resolution=1024 \
         --epoch=500 \
         --batch_size=2 \
-        --savefile=./unetr_visual-1k-orin
+        --savefile=./unetr_vis-1k-orin
