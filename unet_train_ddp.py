@@ -60,7 +60,7 @@ def main(datapath, resolution, epoch, batch_size, savefile):
     # Wrap the model with DataParallel
     if torch.cuda.device_count() > 1:
         print(f"Using {torch.cuda.device_count()} GPUs")
-        unet_model = torch.nn.DataParallel(unet_model)
+        unet_model = torch.nn.DataParallel(unet_model, device_ids=[0,1,2,3,4,5,6,7])
     
     # Move the model to GPU
     # unet_model.to(device)
