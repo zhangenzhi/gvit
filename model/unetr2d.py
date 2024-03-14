@@ -300,7 +300,7 @@ class UNETR(nn.Module):
         return output
     
 if __name__ == "__main__":
-    unetr = UNETR(img_shape=(1024,1024), 
+    unetr = UNETR(img_shape=(4096, 4096), 
                   input_dim=3, 
                   output_dim=1, 
                   embed_dim=768,
@@ -313,7 +313,7 @@ if __name__ == "__main__":
     # z = unetr(x)
     from calflops import calculate_flops
     batch_size = 1
-    input_shape = (batch_size, 3, 1024, 1024)
+    input_shape = (batch_size, 3, 4096, 4096)
     flops, macs, params = calculate_flops(model=unetr, 
                                         input_shape=input_shape,
                                         output_as_string=True,
