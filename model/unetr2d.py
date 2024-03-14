@@ -308,7 +308,7 @@ if __name__ == "__main__":
                   num_heads=12, 
                   dropout=0.1)
     # print(unetr(torch.randn(1, 3, 1024, 1024)).shape)
-    unetr.to("cuda")
+    # unetr.to("cuda")
     # x = torch.randn(1, 3, 1024, 1024).to("cuda")
     # z = unetr(x)
     from calflops import calculate_flops
