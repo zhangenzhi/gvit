@@ -55,7 +55,7 @@ class DiceBCELoss(nn.Module):
 def main(datapath, resolution, epoch, batch_size, savefile):
     # Create an instance of the U-Net model and other necessary components
     num_classes = 1
-    unet_model = UNETR(img_shape=(512,512), 
+    unet_model = UNETR(img_shape=(resolution,resolution), 
                   input_dim=3, 
                   output_dim=num_classes, 
                   embed_dim=768,
