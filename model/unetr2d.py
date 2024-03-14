@@ -307,15 +307,15 @@ if __name__ == "__main__":
                   patch_size=16,
                   num_heads=12, 
                   dropout=0.1)
-    # print(unetr(torch.randn(1, 3, 1024, 1024)).shape)
-    # unetr.to("cuda")
-    # x = torch.randn(1, 3, 1024, 1024).to("cuda")
-    # z = unetr(x)
-    from calflops import calculate_flops
-    batch_size = 1
-    input_shape = (batch_size, 3, 4096, 4096)
-    flops, macs, params = calculate_flops(model=unetr, 
-                                        input_shape=input_shape,
-                                        output_as_string=True,
-                                        output_precision=4)
-    print("Unetr FLOPs:%s   MACs:%s   Params:%s \n" %(flops, macs, params))
+    print(unetr(torch.randn(1, 3, 1024, 1024)).shape)
+    unetr.to("cuda")
+    x = torch.randn(1, 3, 1024, 1024).to("cuda")
+    z = unetr(x)
+    # from calflops import calculate_flops
+    # batch_size = 1
+    # input_shape = (batch_size, 3, 4096, 4096)
+    # flops, macs, params = calculate_flops(model=unetr, 
+    #                                     input_shape=input_shape,
+    #                                     output_as_string=True,
+    #                                     output_precision=4)
+    # print("Unetr FLOPs:%s   MACs:%s   Params:%s \n" %(flops, macs, params))
