@@ -277,7 +277,7 @@ class VITUNETR(nn.Module):
             )
         self.upsampling = nn.Upsample(size=self.img_shape, mode='bilinear', align_corners=True)
 
-    def forward(self, img, qdt=torch.randn(1, 3, 8, 8192)):
+    def forward(self, img, qdt=torch.randn(1, 3, 4, 2116*4)):
         z = self.transformer(qdt)
         z0, z3, z6, z9, z12 = img, *z
         z3 = z3.transpose(-1, -2).view(-1, self.embed_dim, *self.patch_dim)
@@ -299,14 +299,14 @@ class VITUNETR(nn.Module):
     
 if __name__ == "__main__":
     vitunetr = VITUNETR(img_shape=(1024,1024), 
-                  qdt_shape=(8,8192),
+                  qdt_shape=(4,2116*4),
                   input_dim=3, 
                   output_dim=1, 
                   embed_dim=768,
-                  patch_size=8,
+                  patch_size=4,
                   num_heads=12, 
                   dropout=0.1)
-    print(vitunetr(torch.randn(1, 3, 1024, 1024), torch.randn(1, 3, 8, 8192)).shape)
+    print(vitunetr(torch.randn(1, 3, 1024, 1024), torch.randn(1, 3, 4, 2116*4)).shape)
     
     from calflops import calculate_flops
     batch_size = 1
