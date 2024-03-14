@@ -32,4 +32,4 @@ srun -n 1 --ntasks-per-node=1 -c 1 python3 unet_train.py \
         --resolution=512 \
         --epoch=100 \
         --batch_size=8 \
-        --savefile=./unet_visual-512
+        --savefile=./unet_vis_ddp
