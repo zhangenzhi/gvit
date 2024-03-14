@@ -301,7 +301,8 @@ if __name__ == "__main__":
                   patch_size=8,
                   num_heads=12, 
                   dropout=0.1)
-    print(unetr(torch.randn(1, 3, 1024, 1024)).shape)
+    # print(unetr(torch.randn(1, 3, 1024, 1024)).shape)
+    
     from calflops import calculate_flops
     batch_size = 1
     input_shape = (batch_size, 3, 1024, 1024)
