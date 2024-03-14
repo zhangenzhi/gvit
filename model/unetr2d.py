@@ -15,9 +15,9 @@ class SingleDeconv2DBlock(nn.Module):
 
 
 class SingleConv2DBlock(nn.Module):
-    def __init__(self, in_planes, out_planes, kernel_size):
+    def __init__(self, in_planes, out_planes, kernel_size, stride=1):
         super().__init__()
-        self.block = nn.Conv2d(in_planes, out_planes, kernel_size=kernel_size, stride=1,
+        self.block = nn.Conv2d(in_planes, out_planes, kernel_size=kernel_size, stride=stride,
                                padding=((kernel_size - 1) // 2))
 
     def forward(self, x):
@@ -25,10 +25,10 @@ class SingleConv2DBlock(nn.Module):
 
 
 class Conv2DBlock(nn.Module):
-    def __init__(self, in_planes, out_planes, kernel_size=3):
+    def __init__(self, in_planes, out_planes, kernel_size=3, stride=1):
         super().__init__()
         self.block = nn.Sequential(
-            SingleConv2DBlock(in_planes, out_planes, kernel_size),
+            SingleConv2DBlock(in_planes, out_planes, kernel_size, stride=stride),
             nn.BatchNorm2d(out_planes),
             nn.ReLU(True)
         )
@@ -266,6 +266,10 @@ class UNETR(nn.Module):
                 Conv2DBlock(128, 128),
                 SingleDeconv2DBlock(128, 64)
             )
+        self.decoder3_conv = \
+            nn.Sequential(
+                Conv2DBlock(128, 128, stride=2),
+            )
 
         self.decoder0_header = \
             nn.Sequential(
@@ -289,6 +293,7 @@ class UNETR(nn.Module):
         z6 = self.decoder6_upsampler(torch.cat([z6, z9], dim=1))
         z3 = self.decoder3(z3)
         z3 = self.decoder3_upsampler(torch.cat([z3, z6], dim=1))
+        z3 = self.decoder3_conv(z3)
         z0 = self.decoder0(z0)
         output = self.decoder0_header(torch.cat([z0, z3], dim=1))
         return output
