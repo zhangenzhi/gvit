@@ -96,7 +96,7 @@ def main(datapath, resolution, epoch, batch_size, savefile):
 
         for batch in train_loader:
             images, timg, masks = batch
-            timg, masks = timg.to(device), masks.to(device)  # Move data to GPU
+            timg, masks = timg.cuda(), masks.cuda()  # Move data to GPU
             optimizer.zero_grad()
             print(input.device)
             outputs = unet_model(timg)
@@ -117,7 +117,7 @@ def main(datapath, resolution, epoch, batch_size, savefile):
         with torch.no_grad():
             for batch in val_loader:
                 images, timg, masks = batch
-                timg, masks = timg.to(device), masks.to(device)  # Move data to GPU
+                timg, masks = timg.cuda(), masks.cuda()  # Move data to GPU
                 outputs = unet_model(timg)
                 loss = criterion(outputs, masks)
                 epoch_val_loss += loss.item()
@@ -132,7 +132,7 @@ def main(datapath, resolution, epoch, batch_size, savefile):
             unet_model.eval()
             with torch.no_grad():
                 sample_images, sample_timg, sample_masks = next(iter(val_loader))
-                sample_timg, sample_masks = sample_timg.to(device), sample_masks.to(device)  # Move data to GPU
+                sample_timg, sample_masks = sample_timg.cuda(), sample_masks.cuda()  # Move data to GPU
                 sample_outputs = torch.sigmoid(unet_model(sample_timg))
 
                 for i in range(sample_images.size(0)):
@@ -173,7 +173,7 @@ def main(datapath, resolution, epoch, batch_size, savefile):
     with torch.no_grad():
         for batch in test_loader:
             images, timg, masks = batch
-            timg, masks = timg.to(device), masks.to(device)  # Move data to GPU
+            timg, masks = timg.cuda(), masks.cuda()  # Move data to GPU
             outputs = unet_model(timg)
             loss = criterion(outputs, masks)
             test_loss += loss.item()
