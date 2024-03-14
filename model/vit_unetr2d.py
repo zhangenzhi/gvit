@@ -277,7 +277,7 @@ class VITUNETR(nn.Module):
             )
         self.upsampling = nn.Upsample(size=self.img_shape, mode='bilinear', align_corners=True)
 
-    def forward(self, img, qdt=torch.randn(1, 3, 8, 1024*8)):
+    def forward(self, img, qdt=torch.randn(1, 3, 2, 4096*2)):
         z = self.transformer(qdt)
         z0, z3, z6, z9, z12 = img, *z
         z3 = z3.transpose(-1, -2).view(-1, self.embed_dim, *self.patch_dim)
