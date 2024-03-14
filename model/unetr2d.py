@@ -302,6 +302,7 @@ class UNETR(nn.Module):
 if __name__ == "__main__":
     resolution = 1024
     patch_size = 16
+    batch_size = 2
     unetr = UNETR(img_shape=(resolution, resolution), 
                   input_dim=3, 
                   output_dim=1, 
@@ -312,7 +313,7 @@ if __name__ == "__main__":
     unetr.cuda()
     for _ in range(100):
         print(sum(p.numel() for p in unetr.parameters()))
-        print(unetr(torch.randn(1, 3, 1024, 1024).cuda()).shape)
+        print(unetr(torch.randn(batch_size, 3, resolution, resolution).cuda()).shape)
 
 
     from calflops import calculate_flops
