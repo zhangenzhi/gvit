@@ -319,3 +319,4 @@ if __name__ == "__main__":
                                         output_as_string=True,
                                         output_precision=4)
     print("Unetr FLOPs:%s   MACs:%s   Params:%s \n" %(flops, macs, params))
+    print(torch.cuda.device_count())
