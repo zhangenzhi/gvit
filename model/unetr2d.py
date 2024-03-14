@@ -266,6 +266,7 @@ class UNETR(nn.Module):
                 Conv2DBlock(128, 128),
                 SingleDeconv2DBlock(128, 64)
             )
+            
         self.decoder3_conv = \
             nn.Sequential(
                 Conv2DBlock(64, 64, stride=2),
@@ -303,12 +304,12 @@ if __name__ == "__main__":
                   input_dim=3, 
                   output_dim=1, 
                   embed_dim=768,
-                  patch_size=8,
+                  patch_size=16,
                   num_heads=12, 
                   dropout=0.1)
     # print(unetr(torch.randn(1, 3, 1024, 1024)).shape)
-    unetr.cuda()
-    x = torch.randn(1, 3, 1024, 1024).cuda()
+    unetr.to("cuda")
+    x = torch.randn(1, 3, 1024, 1024).to("cuda")
     z = unetr(x)
     # from calflops import calculate_flops
     # batch_size = 1
