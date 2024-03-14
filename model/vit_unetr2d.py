@@ -299,14 +299,14 @@ class VITUNETR(nn.Module):
     
 if __name__ == "__main__":
     vitunetr = VITUNETR(img_shape=(1024,1024), 
-                  qdt_shape=(8,1024*8),
+                  qdt_shape=(2,4096*2),
                   input_dim=3, 
                   output_dim=1, 
                   embed_dim=768,
                   patch_size=8,
                   num_heads=12, 
                   dropout=0.1)
-    print(vitunetr(torch.randn(1, 3, 1024, 1024), torch.randn(1, 3, 8, 1024*8)).shape)
+    print(vitunetr(torch.randn(1, 3, 1024, 1024), torch.randn(1, 3, 2, 4096*2)).shape)
     
     from calflops import calculate_flops
     batch_size = 1
