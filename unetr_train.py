@@ -69,7 +69,8 @@ def main(datapath, resolution, epoch, batch_size, savefile):
     criterion = DiceBCELoss()
     optimizer = optim.Adam(unet_model.parameters(), lr=0.001)
     # Define the learning rate scheduler
-    scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[500, 750, 875], gamma=0.1)
+    milestones =[int(epoch*r) for r in [0.5,0.75,0.875]]
+    scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=milestones, gamma=0.1)
     # Split the dataset into train, validation, and test sets
     data_path = datapath
 

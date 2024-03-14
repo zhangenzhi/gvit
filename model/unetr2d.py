@@ -300,20 +300,21 @@ class UNETR(nn.Module):
         return output
     
 if __name__ == "__main__":
-    unetr = UNETR(img_shape=(1024, 1024), 
+    resolution = 1024
+    patch_size = 16
+    unetr = UNETR(img_shape=(resolution, resolution), 
                   input_dim=3, 
                   output_dim=1, 
                   embed_dim=768,
-                  patch_size=16,
+                  patch_size=patch_size,
                   num_heads=12, 
                   dropout=0.1)
-    print(unetr(torch.randn(1, 3, 1024, 1024)).shape)
-    unetr.to("cuda")
-    x = torch.randn(1, 3, 1024, 1024).to("cuda")
-    z = unetr(x)
+    print(unetr(torch.randn(1, 3, resolution, resolution)).shape)
+
+
     from calflops import calculate_flops
     batch_size = 1
-    input_shape = (batch_size, 3, 1024, 1024)
+    input_shape = (batch_size, 3, resolution, resolution)
     flops, macs, params = calculate_flops(model=unetr, 
                                         input_shape=input_shape,
                                         output_as_string=True,
