@@ -186,6 +186,7 @@ if __name__ == '__main__':
 
     print(sum(p.numel() for p in unetr.parameters()))
     print(unetr(torch.randn(1, 3, 1024, 1024)).shape)
+    unetr.cuda()
     
     from calflops import calculate_flops
     batch_size = 1
