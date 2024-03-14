@@ -294,7 +294,7 @@ class UNETR(nn.Module):
         z6 = self.decoder6_upsampler(torch.cat([z6, z9], dim=1))
         z3 = self.decoder3(z3)
         z3 = self.decoder3_upsampler(torch.cat([z3, z6], dim=1))
-        # z3 = self.decoder3_conv(z3)
+        z3 = self.decoder3_conv(z3)
         z0 = self.decoder0(z0)
         output = self.decoder0_header(torch.cat([z0, z3], dim=1))
         return output
@@ -311,11 +311,11 @@ if __name__ == "__main__":
     unetr.to("cuda")
     x = torch.randn(1, 3, 1024, 1024).to("cuda")
     z = unetr(x)
-    # from calflops import calculate_flops
-    # batch_size = 1
-    # input_shape = (batch_size, 3, 4096, 4096)
-    # flops, macs, params = calculate_flops(model=unetr, 
-    #                                     input_shape=input_shape,
-    #                                     output_as_string=True,
-    #                                     output_precision=4)
-    # print("Unetr FLOPs:%s   MACs:%s   Params:%s \n" %(flops, macs, params))
+    from calflops import calculate_flops
+    batch_size = 1
+    input_shape = (batch_size, 3, 1024, 1024)
+    flops, macs, params = calculate_flops(model=unetr, 
+                                        input_shape=input_shape,
+                                        output_as_string=True,
+                                        output_precision=4)
+    print("Unetr FLOPs:%s   MACs:%s   Params:%s \n" %(flops, macs, params))
