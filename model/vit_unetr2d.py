@@ -302,7 +302,7 @@ if __name__ == "__main__":
     patch_size = 16
     tokens = 1024
     vitunetr = VITUNETR(img_shape=(resolution, resolution), 
-                  qdt_shape=(patch_size,576*patch_size),
+                  qdt_shape=(patch_size,tokens*patch_size),
                   input_dim=3, 
                   output_dim=1, 
                   embed_dim=768,
