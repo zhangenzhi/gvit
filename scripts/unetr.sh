@@ -9,11 +9,11 @@ export MIOPEN_DISABLE_CACHE=1
 export MIOPEN_CUSTOM_CACHE_DIR='pwd' 
 export HOME="/tmp/srun"
 
-# set +x
-# source ~/miniconda_frontier/etc/profile.d/conda.sh
-# conda activate /ccs/home/enzhi/miniconda_frontier/envs/gvit
+export PATH="/lustre/orion/bif146/world-shared/gvit/dataset/miniconda_frontier/bin:$PATH"
 
-# export LD_PRELOAD="/usr/lib64/libcrypto.so /usr/lib64/libssh.so.4 /usr/lib64/libssl.so.1.1"
+set +x
+source /lustre/orion/bif146/world-shared/gvit/dataset/miniconda_frontier/etc/profile.d/conda.sh
+conda activate /lustre/orion/bif146/world-shared/gvit/dataset/miniconda_frontier/envs/gvit
 
 module load PrgEnv-gnu
 module load gcc/12.2.0
@@ -25,4 +25,4 @@ srun -n 1 --ntasks-per-node=1 -c 1 python3 unetr_train.py \
         --resolution=1024 \
         --epoch=500 \
         --batch_size=2 \
-        --savefile=./unetr_visual-1k
+        --savefile=./unetr_visual-1k-orin
