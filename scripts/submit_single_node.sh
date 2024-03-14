@@ -34,4 +34,4 @@ module load rocm/5.7.0
 #         --batch_size=4 \
 #         --savefile=./vis_vitunet_lr
 
-srun -n 1 --ntasks-per-node=1 -c 16 python3 ./model/unetr2d.py
+python3 ./model/unetr2d.py
