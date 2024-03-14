@@ -302,7 +302,7 @@ class UNETR(nn.Module):
 if __name__ == "__main__":
     resolution = 1024
     patch_size = 16
-    batch_size = 2
+    batch_size = 4
     unetr = UNETR(img_shape=(resolution, resolution), 
                   input_dim=3, 
                   output_dim=1, 
