@@ -9,6 +9,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import random_split
 from torch.utils.data import DataLoader
+import torch.nn.functional as F
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -29,10 +30,31 @@ class DiceLoss(nn.Module):
         loss = 1.0 - dice_coefficient  # Adjusted to ensure non-negative loss
         return loss
 
+class DiceBCELoss(nn.Module):
+    def __init__(self, weight=0.5, size_average=True):
+        super(DiceBCELoss, self).__init__()
+        self.weight = weight
+
+    def forward(self, inputs, targets, smooth=1):
+        
+        #comment out if your model contains a sigmoid or equivalent activation layer
+        inputs = F.sigmoid(inputs)       
+        
+        #flatten label and prediction tensors
+        inputs = inputs.view(-1)
+        targets = targets.view(-1)
+        
+        intersection = (inputs * targets).sum()                            
+        dice_loss = 1 - (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)  
+        BCE = F.binary_cross_entropy(inputs, targets, reduction='mean')
+        Dice_BCE = self.weight*BCE + (1-self.weight)*dice_loss
+        
+        return Dice_BCE
+    
 def main(datapath, resolution, epoch, batch_size, savefile):
     # Create an instance of the U-Net model and other necessary components
     num_classes = 1
-    unet_model = TransUNet(img_dim=512,
+    unet_model = TransUNet(img_dim=resolution,
                            in_channels=3,
                            out_channels=128,
                            head_num=4,
@@ -41,16 +63,19 @@ def main(datapath, resolution, epoch, batch_size, savefile):
                            patch_size=16,
                            class_num=num_classes)
     device = torch.device("cuda" if torch.cuda.is_available() else "mps")
+    
     # Move the model to GPU
     unet_model.to(device)
-    criterion = DiceLoss()
+    criterion = DiceBCELoss()
     optimizer = optim.Adam(unet_model.parameters(), lr=0.001)
-
+    # Define the learning rate scheduler
+    milestones =[int(epoch*r) for r in [0.5,0.75,0.875]]
+    scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=milestones, gamma=0.1)
     # Split the dataset into train, validation, and test sets
     data_path = datapath
-    resolution = resolution
 
-    dataset = PAIPDataset(data_path, resolution,  normalize=False)
+    # dataset = PAIQDTDataset(data_path, resolution,  normalize=True)
+    dataset = PAIPDataset(data_path, resolution, normalize=True)
     dataset_size = len(dataset)
     train_size = int(0.7 * dataset_size)
     val_size = (dataset_size - train_size) // 2
@@ -66,7 +91,7 @@ def main(datapath, resolution, epoch, batch_size, savefile):
     num_epochs = epoch
     train_losses = []
     val_losses = []
-    output_dir = "./visualizations"  # Change this to the desired directory
+    output_dir = savefile  # Change this to the desired directory
     os.makedirs(output_dir, exist_ok=True)
 
     for epoch in range(num_epochs):
@@ -74,11 +99,11 @@ def main(datapath, resolution, epoch, batch_size, savefile):
         epoch_train_loss = 0.0
 
         for batch in train_loader:
-            images, masks = batch
-            images, masks = images.to(device), masks.to(device)  # Move data to GPU
+            images, timg, masks = batch
+            timg, masks = timg.to(device), masks.to(device)  # Move data to GPU
             optimizer.zero_grad()
 
-            outputs = unet_model(images)
+            outputs = unet_model(timg)
             loss = criterion(outputs, masks)
             loss.backward()
             optimizer.step()
@@ -87,6 +112,7 @@ def main(datapath, resolution, epoch, batch_size, savefile):
 
         epoch_train_loss /= len(train_loader)
         train_losses.append(epoch_train_loss)
+        scheduler.step()
 
         # Validation
         unet_model.eval()
@@ -94,9 +120,9 @@ def main(datapath, resolution, epoch, batch_size, savefile):
 
         with torch.no_grad():
             for batch in val_loader:
-                images, masks = batch
-                images, masks = images.to(device), masks.to(device)  # Move data to GPU
-                outputs = unet_model(images)
+                images, timg, masks = batch
+                timg, masks = timg.to(device), masks.to(device)  # Move data to GPU
+                outputs = unet_model(timg)
                 loss = criterion(outputs, masks)
                 epoch_val_loss += loss.item()
 
@@ -109,9 +135,9 @@ def main(datapath, resolution, epoch, batch_size, savefile):
         if (epoch + 1) % 3 == 0:  # Adjust the frequency of visualization
             unet_model.eval()
             with torch.no_grad():
-                sample_images, sample_masks = next(iter(val_loader))
-                sample_images, sample_masks = sample_images.to(device), sample_masks.to(device)  # Move data to GPU
-                sample_outputs = torch.sigmoid(unet_model(sample_images))
+                sample_images, sample_timg, sample_masks = next(iter(val_loader))
+                sample_timg, sample_masks = sample_timg.to(device), sample_masks.to(device)  # Move data to GPU
+                sample_outputs = torch.sigmoid(unet_model(sample_timg))
 
                 for i in range(sample_images.size(0)):
                     image = sample_images[i].cpu().permute(1, 2, 0).numpy()
@@ -150,9 +176,9 @@ def main(datapath, resolution, epoch, batch_size, savefile):
 
     with torch.no_grad():
         for batch in test_loader:
-            images, masks = batch
-            images, masks = images.to(device), masks.to(device)  # Move data to GPU
-            outputs = unet_model(images)
+            _, qdts, masks = batch
+            qdts, masks = qdts.to(device), masks.to(device)  # Move data to GPU
+            outputs = unet_model(qdts)
             loss = criterion(outputs, masks)
             test_loss += loss.item()
 
@@ -161,8 +187,7 @@ def main(datapath, resolution, epoch, batch_size, savefile):
     
     draw_loss(output_dir=output_dir)
 
-def draw_loss(output_dir="./transunet_visual"):
-    output_dir = output_dir  # Change this to the desired directory
+def draw_loss(output_dir):
     os.makedirs(output_dir, exist_ok=True)
     
     # Load saved losses
@@ -186,15 +211,18 @@ def draw_loss(output_dir="./transunet_visual"):
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset', type=str,  default="paip", help='name of the dataset.')
     parser.add_argument('--datapath', default="/Volumes/data/dataset/paip/output_images_and_masks", 
                         help='base path of dataset.')
     parser.add_argument('--resolution', default=512, type=int,
                         help='resolution of img.')
     parser.add_argument('--epoch', default=10, type=int,
                         help='Epoch of training.')
-    parser.add_argument('--batch_size', default=8, type=int,
+    parser.add_argument('--batch_size', default=2, type=int,
                         help='Batch_size for training')
-    parser.add_argument('--savefile', default="./transunet_visual",
+    parser.add_argument('--batch_size', default=2, type=int,
+                        help='Batch_size for training')
+    parser.add_argument('--savefile', default="./vitunet_visual",
                         help='save visualized and loss filename')
     args = parser.parse_args()
 
@@ -203,4 +231,4 @@ if __name__ == '__main__':
          epoch=args.epoch,
          batch_size=args.batch_size,
          savefile=args.savefile)
-    # draw_loss("./visualizations")
+    # draw_loss(args.savefile)

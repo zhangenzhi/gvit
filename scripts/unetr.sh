@@ -23,6 +23,6 @@ module load rocm/5.7.0
 srun -n 1 --ntasks-per-node=1 -c 1 python3 unetr_train.py \
         --datapath=./dataset/paip/output_images_and_masks \
         --resolution=1024 \
-        --epoch=1000 \
-        --batch_size=4 \
+        --epoch=500 \
+        --batch_size=2 \
         --savefile=./unetr_visual-1k

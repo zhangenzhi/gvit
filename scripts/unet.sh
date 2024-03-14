@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -A bif146
-#SBATCH -o unetr.o%J
+#SBATCH -o unet.o%J
 #SBATCH -t 02:00:00
 #SBATCH -N 1
 #SBATCH -p batch
@@ -30,4 +30,4 @@ srun python3 unet_train.py \
         --resolution=512 \
         --epoch=100 \
         --batch_size=8 \
-        --savefile=./unet_visual
+        --savefile=./unet_visual-512
