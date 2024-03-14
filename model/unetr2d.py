@@ -309,7 +309,10 @@ if __name__ == "__main__":
                   patch_size=patch_size,
                   num_heads=12, 
                   dropout=0.1)
-    print(unetr(torch.randn(1, 3, resolution, resolution)).shape)
+    unetr.cuda()
+    for _ in range(100):
+        print(sum(p.numel() for p in unetr.parameters()))
+        print(unetr(torch.randn(1, 3, 1024, 1024).cuda()).shape)
 
 
     from calflops import calculate_flops
