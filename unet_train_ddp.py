@@ -98,7 +98,7 @@ def main(datapath, resolution, epoch, batch_size, savefile):
             images, timg, masks = batch
             timg, masks = timg.to(device), masks.to(device)  # Move data to GPU
             optimizer.zero_grad()
-
+            print(input.device)
             outputs = unet_model(timg)
             loss = criterion(outputs, masks)
             loss.backward()

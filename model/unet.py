@@ -49,7 +49,6 @@ class Unet(nn.Module):
         self.conv_last = nn.Conv2d(64, n_class, 1)
 
     def forward(self, input):
-        print(input.device)
         e1 = self.layer1(input)  # 64,256,256
         e2 = self.layer2(e1)     # 64,128,128
         e3 = self.layer3(e2)     # 128,64,64
