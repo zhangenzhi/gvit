@@ -277,7 +277,7 @@ class VITUNETR(nn.Module):
             )
         self.upsampling = nn.Upsample(size=self.img_shape, mode='bilinear', align_corners=True)
 
-    def forward(self, img, qdt=torch.randn(1, 3, 2, 4096*2)):
+    def forward(self, img, qdt=torch.randn(1, 3, 32, 576*32)):
         z = self.transformer(qdt)
         z0, z3, z6, z9, z12 = img, *z
         z3 = z3.transpose(-1, -2).view(-1, self.embed_dim, *self.patch_dim)
@@ -298,19 +298,22 @@ class VITUNETR(nn.Module):
         return output
     
 if __name__ == "__main__":
-    vitunetr = VITUNETR(img_shape=(1024, 1024), 
-                  qdt_shape=(2,4096*2),
+    resolution=4096
+    patch_size = 32
+    tokens = 576
+    vitunetr = VITUNETR(img_shape=(resolution, resolution), 
+                  qdt_shape=(patch_size,576*patch_size),
                   input_dim=3, 
                   output_dim=1, 
                   embed_dim=768,
-                  patch_size=2,
+                  patch_size=patch_size,
                   num_heads=12, 
                   dropout=0.1)
-    print(vitunetr(torch.randn(1, 3, 1024, 1024), torch.randn(1, 3, 2, 4096*2)).shape)
+    print(vitunetr(torch.randn(1, 3, resolution, resolution), torch.randn(1, 3, patch_size, tokens*patch_size)).shape)
     
     from calflops import calculate_flops
     batch_size = 1
-    input_shape = (batch_size, 3, 1024, 1024)
+    input_shape = (batch_size, 3, resolution, resolution)
     flops, macs, params = calculate_flops(model=vitunetr, 
                                         input_shape=input_shape,
                                         output_as_string=True,
