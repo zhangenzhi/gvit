@@ -303,7 +303,7 @@ if __name__ == "__main__":
                   input_dim=3, 
                   output_dim=1, 
                   embed_dim=768,
-                  patch_size=4,
+                  patch_size=8,
                   num_heads=12, 
                   dropout=0.1)
     # print(unetr(torch.randn(1, 3, 1024, 1024)).shape)
