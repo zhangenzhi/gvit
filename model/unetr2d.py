@@ -268,7 +268,7 @@ class UNETR(nn.Module):
             )
         self.decoder3_conv = \
             nn.Sequential(
-                Conv2DBlock(128, 128, stride=2),
+                Conv2DBlock(64, 64, stride=2),
             )
 
         self.decoder0_header = \
