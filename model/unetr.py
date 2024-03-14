@@ -183,10 +183,10 @@ if __name__ == '__main__':
                 block_num=3,
                 patch_size=2,
                 class_num=1)
-
-    print(sum(p.numel() for p in unetr.parameters()))
-    print(unetr(torch.randn(1, 3, 1024, 1024)).shape)
     unetr.cuda()
+    for _ in range(100):
+        print(sum(p.numel() for p in unetr.parameters()))
+        print(unetr(torch.randn(1, 3, 1024, 1024)).shape)
     
     from calflops import calculate_flops
     batch_size = 1
