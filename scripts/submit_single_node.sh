@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -A bif146
-#SBATCH -o vitunetr2d.o%J
+#SBATCH -o calcul.o%J
 #SBATCH -t 2:00:00
 #SBATCH -N 1
 #SBATCH -p batch
