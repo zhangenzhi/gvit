@@ -300,7 +300,7 @@ class UNETR(nn.Module):
         return output
     
 if __name__ == "__main__":
-    unetr = UNETR(img_shape=(4096, 4096), 
+    unetr = UNETR(img_shape=(1024, 1024), 
                   input_dim=3, 
                   output_dim=1, 
                   embed_dim=768,
