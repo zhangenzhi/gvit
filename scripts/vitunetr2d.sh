@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -A bif146
 #SBATCH -o vitunetr2d.o%J
-#SBATCH -t 16:00:00
+#SBATCH -t 2:00:00
 #SBATCH -N 1
 #SBATCH -p batch
 
