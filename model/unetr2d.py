@@ -294,11 +294,19 @@ class UNETR(nn.Module):
         return output
     
 if __name__ == "__main__":
-    unetr = UNETR(img_shape=(512,512), 
+    unetr = UNETR(img_shape=(1024,1024), 
                   input_dim=3, 
                   output_dim=1, 
                   embed_dim=768,
-                  patch_size=16,
+                  patch_size=8,
                   num_heads=12, 
                   dropout=0.1)
-    print(unetr(torch.randn(1, 3, 512, 512)).shape)
+    print(unetr(torch.randn(1, 3, 1024, 1024)).shape)
+    from calflops import calculate_flops
+    batch_size = 1
+    input_shape = (batch_size, 3, 1024, 1024)
+    flops, macs, params = calculate_flops(model=unetr, 
+                                        input_shape=input_shape,
+                                        output_as_string=True,
+                                        output_precision=4)
+    print("Unetr FLOPs:%s   MACs:%s   Params:%s \n" %(flops, macs, params))
