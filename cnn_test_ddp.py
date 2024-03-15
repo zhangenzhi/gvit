@@ -52,7 +52,7 @@ def train(gpu, args):
     batch_size = 100
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss().cuda(gpu)
-    optimizer = torch.optim.SGD(model.parameters(), 1e-4)
+    optimizer = torch.optim.SGD(model.parameters(), 1e-4*args.nr * args.gpus)
     # Data loading code
     train_dataset = torchvision.datasets.MNIST(root='./dataset',
                                                train=True,
