@@ -31,10 +31,24 @@ class ConvNet(nn.Module):
         return out
     
 def train(gpu, args):
+    ############################################################
+    rank = args.nr * args.gpus + gpu	                          
+    dist.init_process_group(                                   
+    	backend='nccl',                                         
+   		init_method='env://',                                   
+    	world_size=args.world_size,                              
+    	rank=rank                                               
+    )                                                          
+    ############################################################
     torch.manual_seed(0)
     model = ConvNet()
     torch.cuda.set_device(gpu)
     model.cuda(gpu)
+    ###############################################################
+    # Wrap the model
+    model = nn.parallel.DistributedDataParallel(model,
+                                                device_ids=[gpu])
+    ###############################################################
     batch_size = 100
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss().cuda(gpu)
@@ -44,11 +58,26 @@ def train(gpu, args):
                                                train=True,
                                                transform=transforms.ToTensor(),
                                                download=True)
-    train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
-                                               batch_size=batch_size,
-                                               shuffle=True,
-                                               num_workers=0,
-                                               pin_memory=True)
+    ################################################################
+    train_sampler = torch.utils.data.distributed.DistributedSampler(
+    	train_dataset,
+    	num_replicas=args.world_size,
+    	rank=rank
+    )
+    ################################################################
+    
+    train_loader = torch.utils.data.DataLoader(
+    	dataset=train_dataset,
+       batch_size=batch_size,
+    ##############################
+       shuffle=False,            #
+    ##############################
+       num_workers=0,
+       pin_memory=True,
+    #############################
+      sampler=train_sampler)    # 
+    #############################
+    
     print(len(train_dataset))
 
     start = datetime.now()
@@ -86,6 +115,12 @@ def main():
     parser.add_argument('--epochs', default=2, type=int, metavar='N',
                         help='number of total epochs to run')
     args = parser.parse_args()
+    #########################################################
+    args.world_size = args.gpus * args.nodes                #
+    os.environ['MASTER_ADDR'] = '127.0.0.1'              #
+    os.environ['MASTER_PORT'] = '8888'                      #
+    mp.spawn(train, nprocs=args.gpus, args=(args,))         #
+    #########################################################
     train(0, args)
     
 if __name__ == '__main__':
