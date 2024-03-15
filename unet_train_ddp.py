@@ -64,11 +64,11 @@ def train(gpu, args):
     criterion = DiceBCELoss()
     optimizer = optim.Adam(unet_model.parameters(), lr=0.001)
     device = torch.device("cuda" if torch.cuda.is_available() else "mps")
-    
+    torch.cuda.set_device(gpu)
+    model.cuda(gpu)
     # Wrap the model with DataParallel
-    if torch.cuda.device_count() > 1:
-        print(f"Using {torch.cuda.device_count()} GPUs")
-        unet_model = torch.nn.DataParallel(unet_model, device_ids=[0,1,2,3,4,5,6,7])
+    model = nn.parallel.DistributedDataParallel(model,
+                                                device_ids=[gpu])
     
     # Move the model to GPU
     # unet_model.to(device)
