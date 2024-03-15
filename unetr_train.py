@@ -92,6 +92,8 @@ def main(datapath, resolution, epoch, batch_size, patch_size, savefile):
     train_losses = []
     val_losses = []
     output_dir = savefile  # Change this to the desired directory
+    train_losses_path = os.path.join(output_dir, 'train_losses.pth')
+    val_losses_path = os.path.join(output_dir, 'val_losses.pth')
     os.makedirs(output_dir, exist_ok=True)
 
     for epoch in range(num_epochs):
@@ -164,11 +166,9 @@ def main(datapath, resolution, epoch, batch_size, patch_size, savefile):
                     plt.savefig(os.path.join(output_dir, f"epoch_{epoch + 1}_sample_{i + 1}.png"))
                     plt.close()
 
-    # Save train and validation losses
-    train_losses_path = os.path.join(output_dir, 'train_losses.pth')
-    val_losses_path = os.path.join(output_dir, 'val_losses.pth')
-    torch.save(train_losses, train_losses_path)
-    torch.save(val_losses, val_losses_path)
+        # Save train and validation losses
+        torch.save(train_losses, train_losses_path)
+        torch.save(val_losses, val_losses_path)
 
     # Test the model
     unet_model.eval()

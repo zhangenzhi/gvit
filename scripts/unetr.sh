@@ -26,4 +26,4 @@ srun -n 1 --ntasks-per-node=1 -c 1 python3 unetr_train.py \
         --epoch=500 \
         --batch_size=2 \
         --patch_size=32 \
-        --savefile=./unetr_vis-1k-orin2
+        --savefile=./unetr-1k-pz32
