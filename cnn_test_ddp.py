@@ -49,10 +49,10 @@ def train(gpu, args):
     model = nn.parallel.DistributedDataParallel(model,
                                                 device_ids=[gpu])
     ###############################################################
-    batch_size = 100//8
+    batch_size = 100
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss().cuda(gpu)
-    optimizer = torch.optim.SGD(model.parameters(), 1e-4)
+    optimizer = torch.optim.SGD(model.parameters(), 1e-4*8)
     # Data loading code
     train_dataset = torchvision.datasets.MNIST(root='./dataset',
                                                train=True,
