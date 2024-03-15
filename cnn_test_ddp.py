@@ -121,7 +121,7 @@ def main():
     os.environ['MASTER_PORT'] = "29500"
     mp.spawn(train, nprocs=args.gpus, args=(args,))         #
     #########################################################
-    train(0, args)
+    # train(0, args)
     
 if __name__ == '__main__':
     main()
