@@ -12,6 +12,7 @@ import torch.multiprocessing as mp
 import torch.nn.functional as F
 import numpy as np
 import matplotlib.pyplot as plt
+import torch.distributed as dist
 
 from model.unet import Unet
 from dataloader.paip_dataset import PAIPDataset
@@ -53,7 +54,13 @@ class DiceBCELoss(nn.Module):
     
 def train(gpu, args):
     rank = args.nr * args.gpus + gpu	
-    
+    dist.init_process_group(                                   
+    	backend='nccl',                                         
+   		init_method='env://',                                   
+    	world_size=args.world_size,                              
+    	rank=rank                                               
+    )
+        
     datapath = args.datapath
     resolution = args.resolution
     epoch = args.epoch
