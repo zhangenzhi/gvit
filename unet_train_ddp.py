@@ -74,7 +74,7 @@ def train(gpu, args):
     torch.cuda.set_device(gpu)
     unet_model.cuda(gpu)
     # Wrap the model with DataParallel
-    unet_model = nn.parallel.DistributedDataParallel(unet_model, device_ids=[gpu],find_unused_parameters=True)
+    unet_model = nn.parallel.DistributedDataParallel(unet_model, device_ids=[gpu], find_unused_parameters=True)
     
     # Move the model to GPU
     # unet_model.to(device)
@@ -173,7 +173,8 @@ def train(gpu, args):
         epoch_val_loss /= len(val_loader)
         val_losses.append(epoch_val_loss)
 
-        print(f"Epoch [{epoch + 1}/{num_epochs}] - Train Loss: {epoch_train_loss:.4f}, Validation Loss: {epoch_val_loss:.4f}")
+        if gpu==0:
+            print(f"Epoch [{epoch + 1}/{num_epochs}] - Train Loss: {epoch_train_loss:.4f}, Validation Loss: {epoch_val_loss:.4f}")
 
         # Visualize and save predictions on a few validation samples
         if (epoch + 1) % 3 == 0 and gpu==0:  # Adjust the frequency of visualization
