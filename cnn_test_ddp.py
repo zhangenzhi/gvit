@@ -42,30 +42,30 @@ def cleanup():
     dist.destroy_process_group()
        
 def train(gpu=None, args=None):
-    dist.init_process_group("nccl")
-    rank = dist.get_rank()
-    device_id = rank % torch.cuda.device_count()
-    model = ConvNet().to(device_id)
-    ddp_model = DDP(model, device_ids=[device_id])
+    # dist.init_process_group("nccl", init_method='env://', world_size=8 )
+    # rank = dist.get_rank()
+    # device_id = rank % torch.cuda.device_count()
+    # model = ConvNet().to(device_id)
+    # ddp_model = DDP(model, device_ids=[device_id])
     
-    # ############################################################
-    # rank = args.nr * args.gpus + gpu	                          
-    # dist.init_process_group(                                   
-    # 	backend='nccl',                                         
-   	# 	init_method='env://',                                   
-    # 	world_size=args.world_size,                              
-    # 	rank=rank                                               
-    # )                                                          
-    # ############################################################
-    # torch.manual_seed(0)
-    # model = ConvNet()
-    # torch.cuda.set_device(gpu)
-    # model.cuda(gpu)
-    # ###############################################################
-    # # Wrap the model
-    # model = nn.parallel.DistributedDataParallel(model,
-    #                                             device_ids=[gpu])
-    # ###############################################################
+    ############################################################
+    rank = args.nr * args.gpus + gpu	                          
+    dist.init_process_group(                                   
+    	backend='nccl',                                         
+   		init_method='env://',                                   
+    	world_size=args.world_size,                              
+    	rank=rank                                               
+    )                                                          
+    ############################################################
+    torch.manual_seed(0)
+    model = ConvNet()
+    torch.cuda.set_device(gpu)
+    model.cuda(gpu)
+    ###############################################################
+    # Wrap the model
+    model = nn.parallel.DistributedDataParallel(model,
+                                                device_ids=[gpu])
+    ###############################################################
     
     batch_size = 100
     # define loss function (criterion) and optimizer

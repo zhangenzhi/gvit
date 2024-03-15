@@ -8,6 +8,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import random_split
 from torch.utils.data import DataLoader
+import torch.multiprocessing as mp
 import torch.nn.functional as F
 import numpy as np
 import matplotlib.pyplot as plt
@@ -50,7 +51,14 @@ class DiceBCELoss(nn.Module):
         
         return Dice_BCE
     
-def main(datapath, resolution, epoch, batch_size, savefile):
+def train(args, gpu):
+    rank = args.nr * args.gpus + gpu	
+    
+    datapath = args.datapath
+    resolution = args.resolution
+    epoch = args.epoch
+    batch_size = args.batch_size
+    savefile = args.savefile
     # Create an instance of the U-Net model and other necessary components
     unet_model = Unet(n_class=1)
     criterion = DiceBCELoss()
@@ -79,9 +87,43 @@ def main(datapath, resolution, epoch, batch_size, savefile):
 
     train_set, val_set, test_set = random_split(dataset, [train_size, val_size, test_size])
 
-    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True)
-    val_loader = DataLoader(val_set, batch_size=batch_size, shuffle=False)
-    test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False)
+    # train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True)
+    # val_loader = DataLoader(val_set, batch_size=batch_size, shuffle=False)
+    # test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False)
+    
+    train_sampler = torch.utils.data.distributed.DistributedSampler(
+    	train_set,
+    	num_replicas=args.world_size,
+    	rank=rank
+    )
+    val_sampler = torch.utils.data.distributed.DistributedSampler(
+    	val_set,
+    	num_replicas=args.world_size,
+    	rank=rank
+    )
+    test_sampler = torch.utils.data.distributed.DistributedSampler(
+    	test_set,
+    	num_replicas=args.world_size,
+    	rank=rank
+    )
+    train_loader = torch.utils.data.DataLoader( dataset=train_set,
+                                                batch_size=batch_size,
+                                                shuffle=False,         
+                                                num_workers=0,
+                                                pin_memory=True,
+                                            sampler=train_sampler) 
+    val_loader = torch.utils.data.DataLoader( dataset=val_set,
+                                                batch_size=batch_size,
+                                                shuffle=False,         
+                                                num_workers=0,
+                                                pin_memory=True,
+                                                sampler=val_sampler) 
+    test_loader = torch.utils.data.DataLoader( dataset=test_set,
+                                                batch_size=batch_size,
+                                                shuffle=False,         
+                                                num_workers=0,
+                                                pin_memory=True,
+                                                sampler=test_sampler) 
 
     # Training loop
     num_epochs = epoch
@@ -96,7 +138,7 @@ def main(datapath, resolution, epoch, batch_size, savefile):
 
         for batch in train_loader:
             images, timg, masks = batch
-            timg, masks = timg.cuda(), masks.cuda()  # Move data to GPU
+            timg, masks = timg.cuda(non_blocking=True), masks.cuda(non_blocking=True)  # Move data to GPU
             optimizer.zero_grad()
             # print(input.device)
             outputs = unet_model(timg)
@@ -117,7 +159,7 @@ def main(datapath, resolution, epoch, batch_size, savefile):
         with torch.no_grad():
             for batch in val_loader:
                 images, timg, masks = batch
-                timg, masks = timg.cuda(), masks.cuda()  # Move data to GPU
+                timg, masks = timg.cuda(non_blocking=True), masks.cuda(non_blocking=True)  # Move data to GPU
                 outputs = unet_model(timg)
                 loss = criterion(outputs, masks)
                 epoch_val_loss += loss.item()
@@ -128,11 +170,11 @@ def main(datapath, resolution, epoch, batch_size, savefile):
         print(f"Epoch [{epoch + 1}/{num_epochs}] - Train Loss: {epoch_train_loss:.4f}, Validation Loss: {epoch_val_loss:.4f}")
 
         # Visualize and save predictions on a few validation samples
-        if (epoch + 1) % 3 == 0:  # Adjust the frequency of visualization
+        if (epoch + 1) % 3 == 0 and gpu==0:  # Adjust the frequency of visualization
             unet_model.eval()
             with torch.no_grad():
                 sample_images, sample_timg, sample_masks = next(iter(val_loader))
-                sample_timg, sample_masks = sample_timg.cuda(), sample_masks.cuda()  # Move data to GPU
+                sample_timg, sample_masks = sample_timg.cuda(non_blocking=True), sample_masks.cuda(non_blocking=True) # Move data to GPU
                 sample_outputs = torch.sigmoid(unet_model(sample_timg))
 
                 for i in range(sample_images.size(0)):
@@ -204,8 +246,7 @@ def draw_loss(output_dir):
     plt.savefig(os.path.join(output_dir, f"train_val_loss.png"))
     plt.close()
     
-if __name__ == '__main__':
-    
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-n', '--nodes', default=1, type=int, metavar='N')
     parser.add_argument('-g', '--gpus', default=1, type=int,
@@ -225,8 +266,12 @@ if __name__ == '__main__':
                         help='save visualized and loss filename')
     args = parser.parse_args()
     
-    main(datapath=Path(args.datapath), 
-         resolution=args.resolution,
-         epoch=args.epoch,
-         batch_size=args.batch_size,
-         savefile=args.savefile)
+    #########################################################
+    args.world_size = args.gpus * args.nodes                #
+    os.environ['MASTER_ADDR'] = "127.0.0.1"
+    os.environ['MASTER_PORT'] = "23456"
+    mp.spawn(train, nprocs=args.gpus, args=(args,))         #
+    #########################################################
+    
+if __name__ == '__main__':
+    main()
