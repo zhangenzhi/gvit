@@ -41,7 +41,7 @@ def setup(rank, world_size):
 def cleanup():
     dist.destroy_process_group()
        
-def train(gpu=None, args=None):
+def train(gpu, args):
     # dist.init_process_group("nccl", init_method='env://', world_size=8 )
     # rank = dist.get_rank()
     # device_id = rank % torch.cuda.device_count()

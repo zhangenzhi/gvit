@@ -51,7 +51,7 @@ class DiceBCELoss(nn.Module):
         
         return Dice_BCE
     
-def train(args, gpu):
+def train(gpu, args):
     rank = args.nr * args.gpus + gpu	
     
     datapath = args.datapath
