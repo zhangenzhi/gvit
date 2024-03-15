@@ -83,7 +83,6 @@ def train(gpu, args):
     start = datetime.now()
     total_step = len(train_loader)
     for epoch in range(args.epochs):
-        print("Epoch [{}]".format(epoch))
         for i, (images, labels) in enumerate(train_loader):
             images = images.cuda(non_blocking=True)
             labels = labels.cuda(non_blocking=True)
