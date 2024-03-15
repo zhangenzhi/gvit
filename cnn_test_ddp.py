@@ -7,6 +7,7 @@ import torchvision.transforms as transforms
 import torch
 import torch.nn as nn
 import torch.distributed as dist
+from torch.nn.parallel import DistributedDataParallel as DDP
 
 class ConvNet(nn.Module):
     def __init__(self, num_classes=10):
@@ -29,30 +30,47 @@ class ConvNet(nn.Module):
         out = out.reshape(out.size(0), -1)
         out = self.fc(out)
         return out
+
+def setup(rank, world_size):
+    os.environ['MASTER_ADDR'] = 'localhost'
+    os.environ['MASTER_PORT'] = '12355'
+
+    # initialize the process group
+    dist.init_process_group("gloo", rank=rank, world_size=world_size)
+
+def cleanup():
+    dist.destroy_process_group()
+       
+def train(gpu=None, args=None):
+    dist.init_process_group("nccl")
+    rank = dist.get_rank()
+    device_id = rank % torch.cuda.device_count()
+    model = ConvNet().to(device_id)
+    ddp_model = DDP(model, device_ids=[device_id])
     
-def train(gpu, args):
-    ############################################################
-    rank = args.nr * args.gpus + gpu	                          
-    dist.init_process_group(                                   
-    	backend='nccl',                                         
-   		init_method='env://',                                   
-    	world_size=args.world_size,                              
-    	rank=rank                                               
-    )                                                          
-    ############################################################
-    torch.manual_seed(0)
-    model = ConvNet()
-    torch.cuda.set_device(gpu)
-    model.cuda(gpu)
-    ###############################################################
-    # Wrap the model
-    model = nn.parallel.DistributedDataParallel(model,
-                                                device_ids=[gpu])
-    ###############################################################
+    # ############################################################
+    # rank = args.nr * args.gpus + gpu	                          
+    # dist.init_process_group(                                   
+    # 	backend='nccl',                                         
+   	# 	init_method='env://',                                   
+    # 	world_size=args.world_size,                              
+    # 	rank=rank                                               
+    # )                                                          
+    # ############################################################
+    # torch.manual_seed(0)
+    # model = ConvNet()
+    # torch.cuda.set_device(gpu)
+    # model.cuda(gpu)
+    # ###############################################################
+    # # Wrap the model
+    # model = nn.parallel.DistributedDataParallel(model,
+    #                                             device_ids=[gpu])
+    # ###############################################################
+    
     batch_size = 100
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss().cuda(gpu)
-    optimizer = torch.optim.SGD(model.parameters(), 1e-4**args.n*args.g)
+    optimizer = torch.optim.SGD(model.parameters(), 1e-4*8)
     # Data loading code
     train_dataset = torchvision.datasets.MNIST(root='./dataset',
                                                train=True,

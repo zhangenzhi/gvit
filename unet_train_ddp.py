@@ -207,14 +207,19 @@ def draw_loss(output_dir):
 if __name__ == '__main__':
     
     parser = argparse.ArgumentParser()
+    parser.add_argument('-n', '--nodes', default=1, type=int, metavar='N')
+    parser.add_argument('-g', '--gpus', default=1, type=int,
+                        help='number of gpus per node')
+    parser.add_argument('-nr', '--nr', default=0, type=int,
+                        help='ranking within the nodes')
     parser.add_argument('--dataset', type=str,  default="paip", help='name of the dataset.')
-    parser.add_argument('--datapath', default="/Volumes/data/dataset/paip/output_images_and_masks", 
+    parser.add_argument('--datapath', default="./dataset/paip/output_images_and_masks", 
                         help='base path of dataset.')
     parser.add_argument('--resolution', default=512, type=int,
                         help='resolution of img.')
     parser.add_argument('--epoch', default=10, type=int,
                         help='Epoch of training.')
-    parser.add_argument('--batch_size', default=2, type=int,
+    parser.add_argument('--batch_size', default=8, type=int,
                         help='Batch_size for training')
     parser.add_argument('--savefile', default="./vitunet_visual",
                         help='save visualized and loss filename')
