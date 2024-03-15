@@ -203,7 +203,7 @@ if __name__ == '__main__':
     parser.add_argument('--dataset', type=str,  default="paip", help='name of the dataset.')
     parser.add_argument('--datapath', default="./dataset/paip/output_images_and_masks", 
                         help='base path of dataset.')
-    parser.add_argument('--resolution', default=512, type=int,
+    parser.add_argument('--resolution', default=1024, type=int,
                         help='resolution of img.')
     parser.add_argument('--epoch', default=10, type=int,
                         help='Epoch of training.')
