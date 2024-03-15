@@ -52,14 +52,14 @@ class DiceBCELoss(nn.Module):
         
         return Dice_BCE
     
-def main(datapath, resolution, epoch, batch_size, savefile):
+def main(datapath, resolution, epoch, batch_size, patch_size, savefile):
     # Create an instance of the U-Net model and other necessary components
     num_classes = 1
     unet_model = UNETR(img_shape=(resolution, resolution), 
                   input_dim=3, 
                   output_dim=num_classes, 
                   embed_dim=768,
-                  patch_size=16,
+                  patch_size=patch_size,
                   num_heads=12, 
                   dropout=0.1)
     device = torch.device("cuda" if torch.cuda.is_available() else "mps")
@@ -220,6 +220,8 @@ if __name__ == '__main__':
                         help='Epoch of training.')
     parser.add_argument('--batch_size', default=2, type=int,
                         help='Batch_size for training')
+    parser.add_argument('--patch_size', default=16, type=int,
+                        help='patch_size for training')
     parser.add_argument('--savefile', default="./vitunet_visual",
                         help='save visualized and loss filename')
     args = parser.parse_args()
@@ -228,5 +230,6 @@ if __name__ == '__main__':
          resolution=args.resolution,
          epoch=args.epoch,
          batch_size=args.batch_size,
+         patch_size=args.patch_size,
          savefile=args.savefile)
     # draw_loss(args.savefile)

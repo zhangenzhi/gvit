@@ -269,7 +269,8 @@ class UNETR(nn.Module):
             
         self.decoder3_conv = \
             nn.Sequential(
-                Conv2DBlock(64, 64, stride=2),
+                # Conv2DBlock(64, 64, stride=2),
+                SingleDeconv2DBlock(64, 64)
             )
 
         self.decoder0_header = \
@@ -294,14 +295,14 @@ class UNETR(nn.Module):
         z6 = self.decoder6_upsampler(torch.cat([z6, z9], dim=1))
         z3 = self.decoder3(z3)
         z3 = self.decoder3_upsampler(torch.cat([z3, z6], dim=1))
-        # z3 = self.decoder3_conv(z3)
+        z3 = self.decoder3_conv(z3)
         z0 = self.decoder0(z0)
         output = self.decoder0_header(torch.cat([z0, z3], dim=1))
         return output
     
 if __name__ == "__main__":
     resolution = 1024
-    patch_size = 16
+    patch_size = 32
     batch_size = 4
     unetr = UNETR(img_shape=(resolution, resolution), 
                   input_dim=3, 
@@ -310,10 +311,10 @@ if __name__ == "__main__":
                   patch_size=patch_size,
                   num_heads=12, 
                   dropout=0.1)
-    unetr.cuda()
-    for _ in range(100):
-        print(sum(p.numel() for p in unetr.parameters()))
-        print(unetr(torch.randn(batch_size, 3, resolution, resolution).cuda()).shape)
+    # unetr.cuda()
+    # for _ in range(100):
+    #     print(sum(p.numel() for p in unetr.parameters()))
+    #     print(unetr(torch.randn(batch_size, 3, resolution, resolution).cuda()).shape)
 
 
     from calflops import calculate_flops
