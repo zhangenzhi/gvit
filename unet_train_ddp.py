@@ -74,8 +74,7 @@ def train(gpu, args):
     torch.cuda.set_device(gpu)
     unet_model.cuda(gpu)
     # Wrap the model with DataParallel
-    unet_model = nn.parallel.DistributedDataParallel(unet_model,
-                                                device_ids=[gpu])
+    unet_model = nn.parallel.DistributedDataParallel(unet_model, device_ids=[gpu],find_unused_parameters=True)
     
     # Move the model to GPU
     # unet_model.to(device)
