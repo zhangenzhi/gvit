@@ -201,7 +201,7 @@ def draw_loss(output_dir):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', type=str,  default="paip", help='name of the dataset.')
-    parser.add_argument('--datapath', default="/Volumes/data/dataset/paip/output_images_and_masks", 
+    parser.add_argument('--datapath', default="./dataset/paip/output_images_and_masks", 
                         help='base path of dataset.')
     parser.add_argument('--resolution', default=512, type=int,
                         help='resolution of img.')
