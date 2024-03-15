@@ -35,7 +35,7 @@ def train(gpu, args):
     rank = args.nr * args.gpus + gpu	                          
     dist.init_process_group(                                   
     	backend='nccl',                                         
-   		# init_method='env://',                                   
+   		init_method='env://',                                   
     	world_size=args.world_size,                              
     	rank=rank                                               
     )                                                          
