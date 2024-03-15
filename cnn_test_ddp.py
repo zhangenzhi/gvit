@@ -109,6 +109,7 @@ def train(gpu, args):
         print("Training complete in: " + str(datetime.now() - start))
         
 def main():
+    import subprocess
     parser = argparse.ArgumentParser()
     parser.add_argument('-n', '--nodes', default=1, type=int, metavar='N')
     parser.add_argument('-g', '--gpus', default=1, type=int,
@@ -120,8 +121,11 @@ def main():
     args = parser.parse_args()
     #########################################################
     args.world_size = args.gpus * args.nodes                #
-    os.environ['MASTER_ADDR'] = "127.0.0.1"
-    os.environ['MASTER_PORT'] = "29500"
+    get_master = "echo $(cat {} | sort | uniq | grep -v batch | grep -v login | head -1)".format(os.environ['LSB_DJOB_HOSTFILE'])
+    os.environ['MASTER_ADDR'] = str(subprocess.check_output(get_master, shell=True))[2:-3]
+    os.environ['MASTER_PORT'] = "23456"
+    # os.environ['MASTER_ADDR'] = "127.0.0.1"
+    # os.environ['MASTER_PORT'] = "29500"
     mp.spawn(train, nprocs=args.gpus, args=(args,))         #
     #########################################################
     # train(0, args)
