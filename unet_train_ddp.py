@@ -65,9 +65,9 @@ def train(gpu, args):
     optimizer = optim.Adam(unet_model.parameters(), lr=0.001)
     device = torch.device("cuda" if torch.cuda.is_available() else "mps")
     torch.cuda.set_device(gpu)
-    model.cuda(gpu)
+    unet_model.cuda(gpu)
     # Wrap the model with DataParallel
-    model = nn.parallel.DistributedDataParallel(model,
+    unet_model = nn.parallel.DistributedDataParallel(unet_model,
                                                 device_ids=[gpu])
     
     # Move the model to GPU
