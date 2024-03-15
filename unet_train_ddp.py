@@ -158,22 +158,23 @@ def train(gpu, args):
         train_losses.append(epoch_train_loss)
         scheduler.step()
 
-        # Validation
-        unet_model.eval()
-        epoch_val_loss = 0.0
-
-        with torch.no_grad():
-            for batch in val_loader:
-                images, timg, masks = batch
-                timg, masks = timg.cuda(non_blocking=True), masks.cuda(non_blocking=True)  # Move data to GPU
-                outputs = unet_model(timg)
-                loss = criterion(outputs, masks)
-                epoch_val_loss += loss.item()
-
-        epoch_val_loss /= len(val_loader)
-        val_losses.append(epoch_val_loss)
-
         if gpu==0:
+        # Validation
+            unet_model.eval()
+            epoch_val_loss = 0.0
+
+            with torch.no_grad():
+                for batch in val_loader:
+                    images, timg, masks = batch
+                    timg, masks = timg.cuda(non_blocking=True), masks.cuda(non_blocking=True)  # Move data to GPU
+                    outputs = unet_model(timg)
+                    loss = criterion(outputs, masks)
+                    epoch_val_loss += loss.item()
+
+            epoch_val_loss /= len(val_loader)
+            val_losses.append(epoch_val_loss)
+
+        
             print(f"Epoch [{epoch + 1}/{num_epochs}] - Train Loss: {epoch_train_loss:.4f}, Validation Loss: {epoch_val_loss:.4f}")
 
         # Visualize and save predictions on a few validation samples
@@ -209,27 +210,28 @@ def train(gpu, args):
                     plt.savefig(os.path.join(output_dir, f"epoch_{epoch + 1}_sample_{i + 1}.png"))
                     plt.close()
 
-    # Save train and validation losses
-    train_losses_path = os.path.join(output_dir, 'train_losses.pth')
-    val_losses_path = os.path.join(output_dir, 'val_losses.pth')
-    torch.save(train_losses, train_losses_path)
-    torch.save(val_losses, val_losses_path)
+    if gpu==0:
+        # Save train and validation losses
+        train_losses_path = os.path.join(output_dir, 'train_losses.pth')
+        val_losses_path = os.path.join(output_dir, 'val_losses.pth')
+        torch.save(train_losses, train_losses_path)
+        torch.save(val_losses, val_losses_path)
 
-    # Test the model
-    unet_model.eval()
-    test_loss = 0.0
+        # Test the model
+        unet_model.eval()
+        test_loss = 0.0
 
-    with torch.no_grad():
-        for batch in test_loader:
-            images, timg, masks = batch
-            timg, masks = timg.cuda(), masks.cuda()  # Move data to GPU
-            outputs = unet_model(timg)
-            loss = criterion(outputs, masks)
-            test_loss += loss.item()
+        with torch.no_grad():
+            for batch in test_loader:
+                images, timg, masks = batch
+                timg, masks = timg.cuda(), masks.cuda()  # Move data to GPU
+                outputs = unet_model(timg)
+                loss = criterion(outputs, masks)
+                test_loss += loss.item()
 
-    test_loss /= len(test_loader)
-    print(f"Test Loss: {test_loss:.4f}")
-    draw_loss(output_dir=output_dir)
+        test_loss /= len(test_loader)
+        print(f"Test Loss: {test_loss:.4f}")
+        draw_loss(output_dir=output_dir)
 
 def draw_loss(output_dir):
     os.makedirs(output_dir, exist_ok=True)

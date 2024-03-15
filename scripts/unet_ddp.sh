@@ -24,5 +24,5 @@ srun -n 1 --ntasks-per-node=1 -c 1 python3 unet_train_ddp.py \
         --datapath=./dataset/paip/output_images_and_masks \
         --resolution=1024 \
         --epoch=100 \
-        --batch_size=4 \
+        --batch_size=8 \
         --savefile=./unet_vis_ddp-1k
