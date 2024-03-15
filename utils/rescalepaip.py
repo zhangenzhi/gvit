@@ -41,7 +41,7 @@ if __name__ == "__main__":
     os.makedirs(output_directory, exist_ok=True)
     processed_slides = os.listdir(output_directory)
     # Target sizes for rescaling
-    target_sizes = [(1024, 1024), (512, 512)]
+    target_sizes = [(4096, 4096), (8192, 8192)]
 
     # Zoom level for rescaling
     zoom_level = 0  # Adjust the zoom level as needed
@@ -50,8 +50,8 @@ if __name__ == "__main__":
     image_mask_pairs = []
     for image_path in glob.glob(os.path.join(image_directory, "*.svs")):
         base_name = os.path.splitext(os.path.basename(image_path))[0]
-        if base_name in processed_slides:
-            continue
+        # if base_name in processed_slides:
+        #     continue
         mask_path = os.path.join(mask_directory, f"{base_name}_mask.tif")
         if os.path.exists(mask_path):
             image_mask_pairs.append((image_path, mask_path))
