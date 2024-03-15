@@ -35,7 +35,7 @@ def train(gpu, args):
     rank = args.nr * args.gpus + gpu	                          
     dist.init_process_group(                                   
     	backend='nccl',                                         
-   		init_method='env://',                                   
+   		# init_method='env://',                                   
     	world_size=args.world_size,                              
     	rank=rank                                               
     )                                                          
@@ -94,7 +94,7 @@ def train(gpu, args):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            if (i + 1) % 100 == 0 and gpu == 0:
+            if (i + 1) % 100 == 0:
                 print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'.format(
                     epoch + 1, 
                     args.epochs, 
