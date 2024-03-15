@@ -49,7 +49,7 @@ def train(gpu, args):
     model = nn.parallel.DistributedDataParallel(model,
                                                 device_ids=[gpu])
     ###############################################################
-    batch_size = 100//(args.nr * args.gpus)
+    batch_size = 100//8
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss().cuda(gpu)
     optimizer = torch.optim.SGD(model.parameters(), 1e-4)
