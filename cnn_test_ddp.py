@@ -121,11 +121,8 @@ def main():
     args = parser.parse_args()
     #########################################################
     args.world_size = args.gpus * args.nodes                #
-    get_master = "echo $(cat {} | sort | uniq | grep -v batch | grep -v login | head -1)".format(os.environ['LSB_DJOB_HOSTFILE'])
-    os.environ['MASTER_ADDR'] = str(subprocess.check_output(get_master, shell=True))[2:-3]
+    os.environ['MASTER_ADDR'] = "127.0.0.1"
     os.environ['MASTER_PORT'] = "23456"
-    # os.environ['MASTER_ADDR'] = "127.0.0.1"
-    # os.environ['MASTER_PORT'] = "29500"
     mp.spawn(train, nprocs=args.gpus, args=(args,))         #
     #########################################################
     # train(0, args)
