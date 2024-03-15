@@ -102,8 +102,8 @@ def train(gpu, args):
                 args.epochs, 
                 i + 1, 
                 total_step,
-                loss.item()),
-                gpu
+                loss.item(),
+                gpu),
                 )
     if gpu == 0:
         print("Training complete in: " + str(datetime.now() - start))
