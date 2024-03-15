@@ -49,6 +49,7 @@ def train(gpu, args):
                                                shuffle=True,
                                                num_workers=0,
                                                pin_memory=True)
+    print(len(train_dataset))
 
     start = datetime.now()
     total_step = len(train_loader)
@@ -86,3 +87,6 @@ def main():
                         help='number of total epochs to run')
     args = parser.parse_args()
     train(0, args)
+    
+if __name__ == '__main__':
+    main()
