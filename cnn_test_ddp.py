@@ -96,15 +96,15 @@ def train(gpu, args):
             loss.backward()
             optimizer.step()
    
-            # if (i + 1) % 100 == 0:
-            print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}, GPU:{}'.format(
-                epoch + 1, 
-                args.epochs, 
-                i + 1, 
-                total_step,
-                loss.item(),
-                gpu),
-                )
+            if (i + 1) % 25 == 0 and gpu==0:
+                print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}, GPU:{}'.format(
+                    epoch + 1, 
+                    args.epochs, 
+                    i + 1, 
+                    total_step,
+                    loss.item(),
+                    gpu),
+                    )
     if gpu == 0:
         print("Training complete in: " + str(datetime.now() - start))
         
