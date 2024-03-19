@@ -5,3 +5,4 @@ __pycache__
 visualizations
 .DS_Store
 *_visual
+*.png
