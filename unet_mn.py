@@ -15,6 +15,7 @@ import torch.distributed as dist
 from model.unet import Unet
 from dataloader.paip_dataset import PAIPDataset
 
+
 # Define the Dice Loss
 class DiceLoss(nn.Module):
     def __init__(self, smooth=1):
@@ -52,12 +53,6 @@ class DiceBCELoss(nn.Module):
     
 def train(gpu, args):
     rank = args.nr * args.gpus + gpu	
-    dist.init_process_group(                                   
-    	backend='nccl',                                         
-   		init_method='env://',                                   
-    	world_size=args.world_size,                              
-    	rank=rank                                               
-    )
         
     datapath = args.datapath
     resolution = args.resolution
@@ -255,12 +250,30 @@ def draw_loss(output_dir):
     plt.close()
     
 def main():
+    os.environ['MASTER_ADDR'] = str(os.environ['HOSTNAME'])
+    os.environ['MASTER_PORT'] = "29500"
+    os.environ['WORLD_SIZE'] = os.environ['SLURM_NTASKS']
+    os.environ['RANK'] = os.environ['SLURM_PROCID']
+
+    world_size = int(os.environ['SLURM_NTASKS'])
+    world_rank = int(os.environ['SLURM_PROCID'])
+    local_rank = int(os.environ['SLURM_LOCALID'])
+        
+    device = torch.device('cuda:{}'.format(local_rank))
+
+
+    dist.init_process_group('nccl', init_method='env://',  rank=world_rank, world_size=world_size)
+
+
+    print("we are here after dist.init_process_group. world_size ",world_size,flush=True)
+
+    if world_rank==0:
+        print("device count ",torch.cuda.device_count(),flush=True)
+        print("device 0 ",torch.cuda.get_device_name(0)," device 1 ",torch.cuda.get_device_name(1)," device 2 ",torch.cuda.get_device_name(2)," device 3 ",torch.cuda.get_device_name(3),flush=True)
+
+        print(f"Torch: {torch.__version__}")
+
     parser = argparse.ArgumentParser()
-    parser.add_argument('-n', '--nodes', default=1, type=int, metavar='N')
-    parser.add_argument('-g', '--gpus', default=1, type=int,
-                        help='number of gpus per node')
-    parser.add_argument('-nr', '--nr', default=0, type=int,
-                        help='ranking within the nodes')
     parser.add_argument('--dataset', type=str,  default="paip", help='name of the dataset.')
     parser.add_argument('--datapath', default="./dataset/paip/output_images_and_masks", 
                         help='base path of dataset.')

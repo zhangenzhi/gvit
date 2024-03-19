@@ -32,4 +32,4 @@ srun -n 1 --ntasks-per-node=1 -c 1 python3 unetr_train_ddp.py \
         --epoch=100 \
         --batch_size=4 \
         --patch_size=32 \
-        --savefile=./unetr-4k
+        --savefile=./unetr-1k

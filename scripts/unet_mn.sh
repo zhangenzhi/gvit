@@ -26,7 +26,7 @@ export HOME="/tmp/srun"
 
 # exec
 srun -n 2 --ntasks-per-node 8 -c 7 \
-    python3 unetr_train_ddp.py \
+    python3 unet_mn.py \
         --datapath=./dataset/paip/output_images_and_masks \
         --resolution=1024 \
         --epoch=100 \

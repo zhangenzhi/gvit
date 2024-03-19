@@ -62,6 +62,7 @@ def plot_img_patch_dist(patches_info):
     
     
 def plot_patchied_info(patches_info):
+    print(patches_info)
     
     # Extract keys and values
     keys = list(patches_info.keys())
