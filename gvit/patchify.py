@@ -155,7 +155,7 @@ def paip_patchify(base, split_value:int, max_depth:int, resolution: int, sth:int
                 
     avg_len = plot_patchied_info(statical_info)
     plot_img_patch_dist(total_patches_info)
-    print("Avg lenth:{}, resolution:{}, to_size:{}, sp_val:{}".format(avg_len,resolution,to_size[0],split_value))
+    print("Avg lenth:{}, resolution:{}, to_size:{}, sp_val:{}, sth:{}".format(avg_len,resolution,to_size[0],split_value,sth))
         
 def imagenet_patcher(datapath):
     train_path = os.path.join(datapath, "train")
