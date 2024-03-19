@@ -9,11 +9,11 @@ export MIOPEN_DISABLE_CACHE=1
 export MIOPEN_CUSTOM_CACHE_DIR='pwd' 
 export HOME="/tmp/srun"
 
-export PATH="/lustre/orion/bif146/world-shared/gvit/dataset/miniconda_frontier/bin:$PATH"
+# export PATH="/lustre/orion/bif146/world-shared/gvit/dataset/miniconda_frontier/bin:$PATH"
 
-set +x
-source /lustre/orion/bif146/world-shared/gvit/dataset/miniconda_frontier/etc/profile.d/conda.sh
-conda activate /lustre/orion/bif146/world-shared/gvit/dataset/miniconda_frontier/envs/gvit
+# set +x
+# source /lustre/orion/bif146/world-shared/gvit/dataset/miniconda_frontier/etc/profile.d/conda.sh
+# conda activate /lustre/orion/bif146/world-shared/gvit/dataset/miniconda_frontier/envs/gvit
 
 module load PrgEnv-gnu
 module load gcc/12.2.0
@@ -26,4 +26,4 @@ srun -n 1 --ntasks-per-node=1 -c 1 python3 unetr_train_ddp.py \
         --epoch=100 \
         --batch_size=4 \
         --patch_size=32 \
-        --savefile=./unetr-1k-pz32
+        --savefile=./unetr-4k

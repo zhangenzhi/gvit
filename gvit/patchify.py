@@ -70,7 +70,7 @@ def plot_patchied_info(patches_info):
     # And sort keys in ascending order
     keys_sorted = sorted(keys, key=lambda x: int(x.split('*')[0]))
     # Arrange values in the corresponding order
-    values_sorted = [patches_info[key] for key in keys_sorted]
+    values_sorted = [patches_info[key]/208 for key in keys_sorted]
 
 
     # Plotting
@@ -82,6 +82,7 @@ def plot_patchied_info(patches_info):
     # Save the figure
     plt.savefig('bar_plot.png')
     plt.close()
+    return sum(values_sorted)
     
 def transform(img, dsize:tuple=(512, 512)):
     res = cv.resize(img, dsize=dsize, interpolation=cv.INTER_CUBIC)
@@ -151,8 +152,9 @@ def paip_patchify(base, split_value:int, max_depth:int, resolution: int, target_
             else:
                 statical_info[key] = value
                 
-    plot_patchied_info(statical_info)
+    avg_len = plot_patchied_info(statical_info)
     plot_img_patch_dist(total_patches_info)
+    print("Avg lenth:{}, resolution:{}, to_size:{}, sp_val:".format(avg_len,resolution,to_size[0],split_value))
         
 def imagenet_patcher(datapath):
     train_path = os.path.join(datapath, "train")
@@ -170,7 +172,8 @@ def patchify(args):
                       resolution=args.resolution,
                       split_value=args.split_value,
                       target_length=args.target_length,
-                      max_depth=args.max_depth)
+                      max_depth=args.max_depth,
+                      to_size=(args.to_size,args.to_size,3))
     elif args.dataset == "btcv":
         pass
     else:
@@ -182,6 +185,7 @@ if __name__ == '__main__':
     parser.add_argument('--dataset', type=str,  default="paip", help='name of the dataset.')
     parser.add_argument('--resolution', type=int, default=512, help='resolution of the img.')
     parser.add_argument('--max_depth', type=int, default=10, help='path of the dataset.')
+    parser.add_argument('--to_size', type=int, default=8, help='path of the dataset.')
     parser.add_argument('--target_length', type=int, default=576, help='path of the dataset.')
     parser.add_argument('--split_value', type=int, default=80, help='criteron value to subdivision.')
     parser.add_argument('--datapath',  type=str, default="/Volumes/data/dataset/paip/output_images_and_masks", 

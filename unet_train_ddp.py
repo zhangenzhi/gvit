@@ -130,6 +130,7 @@ def train(gpu, args):
                                                 num_workers=0,
                                                 pin_memory=True,
                                                 sampler=test_sampler) 
+    print("Size of the train set {}.".format(len(train_set)))
 
     # Training loop
     num_epochs = epoch

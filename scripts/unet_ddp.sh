@@ -25,4 +25,4 @@ srun -n 1 --ntasks-per-node=1 -c 1 python3 unet_train_ddp.py \
         --resolution=1024 \
         --epoch=100 \
         --batch_size=8 \
-        --savefile=./unet_vis_ddp-1k
+        --savefile=./unet_vis_4k
