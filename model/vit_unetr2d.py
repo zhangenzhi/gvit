@@ -298,8 +298,8 @@ class VITUNETR(nn.Module):
         return output
     
 if __name__ == "__main__":
-    resolution=4096
-    patch_size = 4
+    resolution=1024
+    patch_size = 8
     tokens = 1024
     vitunetr = VITUNETR(img_shape=(resolution, resolution), 
                   qdt_shape=(patch_size,tokens*patch_size),
@@ -307,7 +307,7 @@ if __name__ == "__main__":
                   output_dim=1, 
                   embed_dim=768,
                   patch_size=patch_size,
-                  num_heads=8, 
+                  num_heads=12, 
                   dropout=0.1)
     vitunetr.cuda()
     import time
