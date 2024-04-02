@@ -269,12 +269,12 @@ class VITUNETR(nn.Module):
                 SingleDeconv2DBlock(128, 64)
             )
 
-        self.decoder0_header = \
-            nn.Sequential(
-                Conv2DBlock(128, 64),
-                Conv2DBlock(64, 64),
-                SingleConv2DBlock(64, output_dim, 1)
-            )
+        # self.decoder0_header = \
+        #     nn.Sequential(
+        #         Conv2DBlock(128, 64),
+        #         Conv2DBlock(64, 64),
+        #         SingleConv2DBlock(64, output_dim, 1)
+        #     )
         self.upsampling = nn.Upsample(size=self.img_shape, mode='bilinear', align_corners=True)
 
     def forward(self, img, qdt=torch.randn(1, 3, 32, 1024*32)):
