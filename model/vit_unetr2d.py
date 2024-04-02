@@ -307,7 +307,7 @@ if __name__ == "__main__":
                   output_dim=1, 
                   embed_dim=768,
                   patch_size=patch_size,
-                  num_heads=12, 
+                  num_heads=8, 
                   dropout=0.1)
     vitunetr.cuda()
     import time
