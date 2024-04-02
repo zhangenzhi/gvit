@@ -272,7 +272,7 @@ class VITUNETR(nn.Module):
         self.decoder0_header = \
             nn.Sequential(
                 Conv2DBlock(128, 64),
-                # Conv2DBlock(64, 64),
+                Conv2DBlock(64, 64),
                 SingleConv2DBlock(64, output_dim, 1)
             )
         self.upsampling = nn.Upsample(size=self.img_shape, mode='bilinear', align_corners=True)
@@ -294,8 +294,8 @@ class VITUNETR(nn.Module):
         z3 = self.decoder3_upsampler(torch.cat([z3, z6], dim=1))
         z3 = self.upsampling(z3)
         z0 = self.decoder0(z0)
-        output = self.decoder0_header(torch.cat([z0, z3], dim=1))
-        return output
+        # output = self.decoder0_header(torch.cat([z0, z3], dim=1))
+        return z0
     
 if __name__ == "__main__":
     resolution=4096
