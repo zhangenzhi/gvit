@@ -313,7 +313,7 @@ if __name__ == "__main__":
     import time
     start_time = time.time()
     for i in range(10):
-        print(vitunetr(torch.randn(1, 3, resolution, resolution).cuda(), torch.randn(1, 3, patch_size, tokens*patch_size)).shape)
+       vitunetr(torch.randn(1, 3, resolution, resolution).cuda(), torch.randn(1, 3, patch_size, tokens*patch_size)).shape
     print("cost {}".format(time.time()-start_time))
     
     # from calflops import calculate_flops
