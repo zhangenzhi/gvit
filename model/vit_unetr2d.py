@@ -278,7 +278,7 @@ class VITUNETR(nn.Module):
         self.upsampling = nn.Upsample(size=self.img_shape, mode='bilinear', align_corners=True)
 
     def forward(self, img, qdt=torch.randn(1, 3, 32, 1024*32)):
-        z = self.transformer(qdt.cuda())
+        z = self.transformer(qdt)
         z0, z3, z6, z9, z12 = img, *z
         z3 = z3.transpose(-1, -2).view(-1, self.embed_dim, *self.patch_dim)
         z6 = z6.transpose(-1, -2).view(-1, self.embed_dim, *self.patch_dim)
@@ -310,10 +310,12 @@ if __name__ == "__main__":
                   num_heads=12, 
                   dropout=0.1)
     vitunetr.cuda()
+    qdt = torch.randn(1, 3, patch_size, tokens*patch_size).cuda()
+    x = torch.randn(1, 3, resolution, resolution).cuda()
     import time
     start_time = time.time()
     for i in range(10):
-       vitunetr(torch.randn(1, 3, resolution, resolution).cuda(), torch.randn(1, 3, patch_size, tokens*patch_size)).shape
+       vitunetr(x, qdt).shape
     print("cost {}".format(time.time()-start_time))
     
     # from calflops import calculate_flops
