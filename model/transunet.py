@@ -154,7 +154,7 @@ class TransUNet(nn.Module):
 if __name__ == '__main__':
     import torch
 
-    res = 4096
+    res = 1024
     patch = 32
     transunet = TransUNet(img_dim=res,
                           in_channels=3,
@@ -162,7 +162,7 @@ if __name__ == '__main__':
                           head_num=4,
                           mlp_dim=512,
                           block_num=8,
-                          patch_size=16,
+                          patch_size=patch,
                           class_num=1)
 
     print(sum(p.numel() for p in transunet.parameters()))

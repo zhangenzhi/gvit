@@ -102,11 +102,12 @@ def main(datapath, resolution, tokens, epoch, batch_size, savefile):
     output_dir = savefile  # Change this to the desired directory
     os.makedirs(output_dir, exist_ok=True)
 
+    import time
     for epoch in range(num_epochs):
         unet_model.train()
         epoch_train_loss = 0.0
         epoch_dice_train = 0.0
-
+        start_time = time.time()
         for batch in train_loader:
             images, qdts, masks = batch
             images, qdts, masks = images.to(device), qdts.to(device), masks.to(device)  # Move data to GPU
@@ -123,6 +124,8 @@ def main(datapath, resolution, tokens, epoch, batch_size, savefile):
             # predicted_masks = torch.sigmoid(outputs)
             # dice_score = calculate_dice_score(predicted_masks, masks)
             # epoch_dice_train += dice_score
+        end_time = time.time()
+        print("epoch cost:{}, sec/img:{}".format(end_time-start_time,(end_time-start_time)/train_size))
 
         epoch_train_loss /= len(train_loader)
         train_losses.append(epoch_train_loss)
