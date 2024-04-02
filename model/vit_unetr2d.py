@@ -272,7 +272,7 @@ class VITUNETR(nn.Module):
         self.decoder0_header = \
             nn.Sequential(
                 Conv2DBlock(128, 64),
-                Conv2DBlock(64, 64),
+                # Conv2DBlock(64, 64),
                 SingleConv2DBlock(64, output_dim, 1)
             )
         self.upsampling = nn.Upsample(size=self.img_shape, mode='bilinear', align_corners=True)
