@@ -9,7 +9,7 @@ import torchvision
 from matplotlib import pyplot as plt
 from torchvision import transforms
 import numpy as np
-
+from utils.savescsv import savedict, savelist
 import argparse
 
 import os 
@@ -50,20 +50,24 @@ def get_imagenet_path(datapath):
 def plot_img_patch_dist(patches_info):
     length = [sum(img_dict.values()) for img_dict in patches_info]
     
+    savelist(length, "length")
     # Plotting
-    plt.hist(length, color='blue', edgecolor='black')
-    plt.xlabel('Length of Patches')
-    plt.ylabel('Frequency')
-    plt.title('Distribution of Patches by PAIP Samples')
+    plt.hist(length, color='red', edgecolor='black')
+    plt.xlabel('Length of Patches', fontsize=18)
+    plt.ylabel('Frequency', fontsize=18)
+    plt.title('Distribution of Patches by PAIP Samples', fontsize=18)
+    plt.legend(fontsize=18)
+    plt.tick_params(labelsize=18)
+    plt.tight_layout()
 
     # Save the figure
-    plt.savefig('histogram_plot.png')
+    plt.savefig('histogram_plot.pdf')
     plt.close()
     
     
 def plot_patchied_info(patches_info):
     print(patches_info)
-    
+    savedict(patches_info,name="patches")
     # Extract keys and values
     keys = list(patches_info.keys())
     values = list(patches_info.values())
@@ -71,17 +75,21 @@ def plot_patchied_info(patches_info):
     # And sort keys in ascending order
     keys_sorted = sorted(keys, key=lambda x: int(x.split('*')[0]))
     # Arrange values in the corresponding order
-    values_sorted = [patches_info[key]/208 for key in keys_sorted]
+    values_sorted = [patches_info[k]/208 for k in keys_sorted]
+    keys_sorted = [x.split('*')[0] for x in keys_sorted]
 
 
     # Plotting
     plt.bar(keys_sorted, values_sorted, color='blue')
-    plt.xlabel('Size of Patches')
-    plt.ylabel('Counts')
-    plt.title('Count of Total Patches of PAIP')
+    plt.xlabel('Size of Patches', fontsize=18)
+    plt.ylabel('Counts', fontsize=18)
+    plt.title('Count of Total Patches of PAIP', fontsize=18)
+    plt.legend(fontsize=18)
+    plt.tick_params(labelsize=18)
+    plt.tight_layout()
     
     # Save the figure
-    plt.savefig('bar_plot.png')
+    plt.savefig('bar_plot.pdf')
     plt.close()
     return sum(values_sorted)
     
@@ -190,7 +198,7 @@ if __name__ == '__main__':
     parser.add_argument('--to_size', type=int, default=8, help='path of the dataset.')
     parser.add_argument('--target_length', type=int, default=576, help='path of the dataset.')
     parser.add_argument('--sth', type=int, default=3, help='smooth factor for gaussain smoothing.')
-    parser.add_argument('--split_value', type=int, default=80, help='criteron value to subdivision.')
+    parser.add_argument('--split_value', type=int, default=100, help='criteron value to subdivision.')
     parser.add_argument('--datapath',  type=str, default="/Volumes/data/dataset/paip/output_images_and_masks", 
                         help='base path of dataset.')
     args = parser.parse_args()
