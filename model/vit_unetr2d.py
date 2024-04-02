@@ -314,7 +314,7 @@ if __name__ == "__main__":
     x = torch.randn(1, 3, resolution, resolution).cuda()
     import time
     start_time = time.time()
-    for i in range(10):
+    for i in range(100):
        vitunetr(x, qdt).shape
     print("cost {}".format(time.time()-start_time))
     
