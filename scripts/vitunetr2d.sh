@@ -37,6 +37,7 @@ module load rocm/5.7.0
 srun -n 1 --ntasks-per-node=1 -c 1 python3 vitunetr2d_train.py \
         --datapath=./dataset/paip/output_images_and_masks \
         --resolution=1024 \
+        --tokens=1024 \
         --epoch=1000 \
         --batch_size=8 \
         --savefile=./vis_vitunet_1k
