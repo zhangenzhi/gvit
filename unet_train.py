@@ -83,11 +83,12 @@ def main(datapath, resolution, epoch, batch_size, savefile):
     val_losses = []
     output_dir = savefile  # Change this to the desired directory
     os.makedirs(output_dir, exist_ok=True)
-    
+    import time
     for epoch in range(num_epochs):
         unet_model.train()
         epoch_train_loss = 0.0
-
+        
+        start_time = time.time()
         for batch in train_loader:
             images, timg, masks = batch
             timg, masks = timg.to(device), masks.to(device)  # Move data to GPU
@@ -99,6 +100,8 @@ def main(datapath, resolution, epoch, batch_size, savefile):
             optimizer.step()
 
             epoch_train_loss += loss.item()
+        end_time = time.time()
+        print("epoch cost:{}, sec/img:{}".format(end_time-start_time,(end_time-start_time)/train_size))
 
         epoch_train_loss /= len(train_loader)
         train_losses.append(epoch_train_loss)
