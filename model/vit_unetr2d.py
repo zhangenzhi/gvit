@@ -312,14 +312,15 @@ if __name__ == "__main__":
     vitunetr.cuda()
     import time
     start_time = time.time()
-    print(vitunetr(torch.randn(1, 3, resolution, resolution).cuda(), torch.randn(1, 3, patch_size, tokens*patch_size)).shape)
+    for i in range(10):
+        print(vitunetr(torch.randn(1, 3, resolution, resolution).cuda(), torch.randn(1, 3, patch_size, tokens*patch_size)).shape)
     print("cost {}".format(time.time()-start_time))
     
-    from calflops import calculate_flops
-    batch_size = 1
-    input_shape = (batch_size, 3, resolution, resolution)
-    flops, macs, params = calculate_flops(model=vitunetr, 
-                                        input_shape=input_shape,
-                                        output_as_string=True,
-                                        output_precision=4)
-    print("Vitunet FLOPs:%s   MACs:%s   Params:%s \n" %(flops, macs, params))
+    # from calflops import calculate_flops
+    # batch_size = 1
+    # input_shape = (batch_size, 3, resolution, resolution)
+    # flops, macs, params = calculate_flops(model=vitunetr, 
+    #                                     input_shape=input_shape,
+    #                                     output_as_string=True,
+    #                                     output_precision=4)
+    # print("Vitunet FLOPs:%s   MACs:%s   Params:%s \n" %(flops, macs, params))
