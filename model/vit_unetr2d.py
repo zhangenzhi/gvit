@@ -309,7 +309,11 @@ if __name__ == "__main__":
                   patch_size=patch_size,
                   num_heads=12, 
                   dropout=0.1)
+    vitunetr.cuda()
+    import time
+    start_time = time.time()
     print(vitunetr(torch.randn(1, 3, resolution, resolution), torch.randn(1, 3, patch_size, tokens*patch_size)).shape)
+    print("cost {}".format(start_time = time.time())
     
     from calflops import calculate_flops
     batch_size = 1
