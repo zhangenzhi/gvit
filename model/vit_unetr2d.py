@@ -298,7 +298,7 @@ class VITUNETR(nn.Module):
         return output
     
 if __name__ == "__main__":
-    resolution=1024
+    resolution=4096
     patch_size = 8
     tokens = 1024
     vitunetr = VITUNETR(img_shape=(resolution, resolution), 
