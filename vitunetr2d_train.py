@@ -263,7 +263,7 @@ if __name__ == '__main__':
                         help='base path of dataset.')
     parser.add_argument('--resolution', default=512, type=int,
                         help='resolution of img.')
-    parser.add_argument('--tokens', default=2116, type=int,
+    parser.add_argument('--tokens', default=1024, type=int,
                         help='quadtree length img.')
     parser.add_argument('--epoch', default=10, type=int,
                         help='Epoch of training.')

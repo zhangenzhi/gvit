@@ -203,5 +203,7 @@ if __name__ == '__main__':
                         help='base path of dataset.')
     args = parser.parse_args()
     
+    import time
+    start_time = time.time()
     patchify(args)
-    
+    print("patchify cost time {}".format(time.time()-start_time))

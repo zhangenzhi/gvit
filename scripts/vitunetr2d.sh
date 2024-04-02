@@ -27,12 +27,13 @@ module load rocm/5.7.0
 # nnodes=${#nodes[@]}
 
 # exec
-# srun -n 1 --ntasks-per-node=1 -c 1 python3 vitunetr2d_train.py \
-#         --datapath=./dataset/paip/output_images_and_masks \
-#         --resolution=512 \
-#         --epoch=1000 \
-#         --batch_size=16 \
-#         --savefile=./vis_vitunet_lr
+srun -n 1 --ntasks-per-node=1 -c 1 python3 vitunetr2d_train.py \
+        --datapath=./dataset/paip/output_images_and_masks \
+        --resolution=512 \
+        --tokens=576 \
+        --epoch=1000 \
+        --batch_size=16 \
+        --savefile=./vis_vitunet_512
 
 srun -n 1 --ntasks-per-node=1 -c 1 python3 vitunetr2d_train.py \
         --datapath=./dataset/paip/output_images_and_masks \
@@ -41,3 +42,11 @@ srun -n 1 --ntasks-per-node=1 -c 1 python3 vitunetr2d_train.py \
         --epoch=1000 \
         --batch_size=8 \
         --savefile=./vis_vitunet_1k
+
+srun -n 1 --ntasks-per-node=1 -c 1 python3 vitunetr2d_train.py \
+        --datapath=./dataset/paip/output_images_and_masks \
+        --resolution=4096 \
+        --tokens=4096 \
+        --epoch=1000 \
+        --batch_size=1 \
+        --savefile=./vis_vitunet_4k
