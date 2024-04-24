@@ -85,11 +85,11 @@ def plot_patchied_info(patches_info):
     plt.close()
     return sum(values_sorted)
     
-def transform(img, sth:int=3, dsize:tuple=(512, 512)):
+def transform(img, sth:int=3, canny:tuple=(100,200), dsize:tuple=(512, 512)):
     res = cv.resize(img, dsize=dsize, interpolation=cv.INTER_CUBIC)
     grey_img = res[:, :, 0]
     blur = cv.GaussianBlur(grey_img, (sth,sth), 0)
-    edge = cv.Canny(blur, 100, 200)
+    edge = cv.Canny(blur, canny[0], canny[1])
     return res, edge
 
 def count_info(qdt:QuadTree):
@@ -138,7 +138,7 @@ def paip_patchify(base, split_value:int, max_depth:int, resolution: int, sth:int
     statical_info = {}
     for i,p in enumerate(img_path):
         img = cv.imread(p)
-        img, edge = transform(img, sth=sth, dsize=(resolution, resolution))
+        img, edge = transform(img, sth=sth, canny=(args.c_low,args.c_high), dsize=(resolution, resolution))
         qdt = QuadTree(domain=edge, max_value=split_value, max_depth = max_depth)
         seq_patches, patch_size, patch_info = compress_mix_patches(qdt, img, to_size, target_length)
         seq_img = np.asarray(seq_patches)
@@ -155,7 +155,7 @@ def paip_patchify(base, split_value:int, max_depth:int, resolution: int, sth:int
                 
     avg_len = plot_patchied_info(statical_info)
     plot_img_patch_dist(total_patches_info)
-    print("Avg lenth:{}, resolution:{}, to_size:{}, sp_val:{}, sth:{}".format(avg_len,resolution,to_size[0],split_value,sth))
+    print("Avg lenth:{}, resolution:{}, to_size:{}, sp_val:{}, sth:{}".format(avg_len, resolution, to_size[0], split_value, sth))
         
 def imagenet_patcher(datapath):
     train_path = os.path.join(datapath, "train")
@@ -175,7 +175,7 @@ def patchify(args):
                       split_value=args.split_value,
                       target_length=args.target_length,
                       max_depth=args.max_depth,
-                      to_size=(args.to_size,args.to_size,3))
+                      to_size=(args.to_size, args.to_size, 3))
     elif args.dataset == "btcv":
         pass
     else:
@@ -190,6 +190,8 @@ if __name__ == '__main__':
     parser.add_argument('--to_size', type=int, default=8, help='path of the dataset.')
     parser.add_argument('--target_length', type=int, default=576, help='path of the dataset.')
     parser.add_argument('--sth', type=int, default=3, help='smooth factor for gaussain smoothing.')
+    parser.add_argument('--c_low', type=int, default=100, help='lower threshold for canny edge detection.')
+    parser.add_argument('--c_high', type=int, default=200, help='higher threshold for canny edge detection.')
     parser.add_argument('--split_value', type=int, default=80, help='criteron value to subdivision.')
     parser.add_argument('--datapath',  type=str, default="/Volumes/data/dataset/paip/output_images_and_masks", 
                         help='base path of dataset.')

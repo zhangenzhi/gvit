@@ -8,6 +8,7 @@
 export MIOPEN_DISABLE_CACHE=1 
 export MIOPEN_CUSTOM_CACHE_DIR='pwd' 
 export HOME="/tmp/srun"
+cp resnet18-f37072fd.pth /tmp/srun/.cache/torch/hub/checkpoints/
 
 # export PATH="/lustre/orion/bif146/world-shared/gvit/dataset/miniconda_frontier/bin:$PATH"
 
@@ -24,6 +25,16 @@ module load rocm/5.7.0
 srun -n 1 --ntasks-per-node=1 -c 1 python3 unet_train_ddp.py \
         --datapath=./dataset/paip/output_images_and_masks \
         --resolution=1024 \
-        --epoch=100 \
+        --epoch=10 \
         --batch_size=8 \
-        --savefile=./unet_vis_4k
+        --savefile=./unet_vis_1k
+
+# 8-gpu
+python3 unet_train_ddp.py \
+        -g=8 \
+        -n=1 \
+        --datapath=./dataset/paip/output_images_and_masks \
+        --resolution=1024 \
+        --epoch=10 \
+        --batch_size=8 \
+        --savefile=./unet_8g

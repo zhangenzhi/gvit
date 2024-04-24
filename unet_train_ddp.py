@@ -69,7 +69,7 @@ def train(gpu, args):
     # Create an instance of the U-Net model and other necessary components
     unet_model = Unet(n_class=1)
     criterion = DiceBCELoss()
-    optimizer = optim.Adam(unet_model.parameters(), lr=0.001)
+    optimizer = optim.Adam(unet_model.parameters(), lr=0.001*(args.gpus*args.n))
     device = torch.device("cuda" if torch.cuda.is_available() else "mps")
     torch.cuda.set_device(gpu)
     unet_model.cuda(gpu)
@@ -147,7 +147,6 @@ def train(gpu, args):
             images, timg, masks = batch
             timg, masks = timg.cuda(non_blocking=True), masks.cuda(non_blocking=True)  # Move data to GPU
             optimizer.zero_grad()
-            # print(input.device)
             outputs = unet_model(timg)
             loss = criterion(outputs, masks)
             loss.backward()
