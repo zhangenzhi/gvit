@@ -28,4 +28,4 @@ python3 vitunet_train.py \
         --resolution=512 \
         --epoch=100 \
         --batch_size=16 \
-        --savefile=./vitunet_visual
+        --savefile=./vitunet_visual-512

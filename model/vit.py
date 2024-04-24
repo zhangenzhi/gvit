@@ -134,12 +134,22 @@ class ViT(nn.Module):
 
 
 if __name__ == '__main__':
-    vit = ViT(img_dim=128,
+    res = 8192
+    patch = 2048
+    vit = ViT(img_dim=res,
               in_channels=3,
-              patch_size=16,
+              patch_size=patch,
               embedding_dim=512,
-              block_num=6,
-              head_num=4,
+              block_num=8,
+              head_num=8,
               mlp_dim=1024)
     print(sum(p.numel() for p in vit.parameters()))
-    print(vit(torch.rand(1, 3, 128, 128)).shape)
+    print(vit(torch.rand(1, 3, res, res)).shape)
+    from calflops import calculate_flops
+    batch_size = 1
+    input_shape = (batch_size, 3, res, res)
+    flops, macs, params = calculate_flops(model=vit, 
+                                        input_shape=input_shape,
+                                        output_as_string=True,
+                                        output_precision=4)
+    print("vit FLOPs:%s   MACs:%s   Params:%s \n" %(flops, macs, params))

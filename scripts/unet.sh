@@ -26,3 +26,11 @@ srun python3 unet_train.py \
         --epoch=100 \
         --batch_size=8 \
         --savefile=./unet_visual-512
+
+# exec
+srun python3 unet_train.py \
+        --datapath=./dataset/paip/output_images_and_masks \
+        --resolution=4096 \
+        --epoch=100 \
+        --batch_size=1 \
+        --savefile=./unet_visual-4k

@@ -269,12 +269,12 @@ class VITUNETR(nn.Module):
                 SingleDeconv2DBlock(128, 64)
             )
 
-        self.decoder0_header = \
-            nn.Sequential(
-                Conv2DBlock(128, 64),
-                Conv2DBlock(64, 64),
-                SingleConv2DBlock(64, output_dim, 1)
-            )
+        # self.decoder0_header = \
+        #     nn.Sequential(
+        #         Conv2DBlock(128, 64),
+        #         Conv2DBlock(64, 64),
+        #         SingleConv2DBlock(64, output_dim, 1)
+        #     )
         self.upsampling = nn.Upsample(size=self.img_shape, mode='bilinear', align_corners=True)
 
     def forward(self, img, qdt=torch.randn(1, 3, 32, 1024*32)):
@@ -294,13 +294,13 @@ class VITUNETR(nn.Module):
         z3 = self.decoder3_upsampler(torch.cat([z3, z6], dim=1))
         z3 = self.upsampling(z3)
         z0 = self.decoder0(z0)
-        output = self.decoder0_header(torch.cat([z0, z3], dim=1))
-        return output
+        # output = self.decoder0_header(torch.cat([z0, z3], dim=1))
+        return z0
     
 if __name__ == "__main__":
     resolution=8192
-    patch_size = 32
-    tokens = 1024
+    patch_size = 8
+    tokens = 900
     vitunetr = VITUNETR(img_shape=(resolution, resolution), 
                   qdt_shape=(patch_size,tokens*patch_size),
                   input_dim=3, 
@@ -309,13 +309,20 @@ if __name__ == "__main__":
                   patch_size=patch_size,
                   num_heads=12, 
                   dropout=0.1)
-    print(vitunetr(torch.randn(1, 3, resolution, resolution), torch.randn(1, 3, patch_size, tokens*patch_size)).shape)
+    vitunetr.cuda()
+    qdt = torch.randn(1, 3, patch_size, tokens*patch_size).cuda()
+    x = torch.randn(1, 3, resolution, resolution).cuda()
+    import time
+    start_time = time.time()
+    for i in range(25):
+       vitunetr(x, qdt).shape
+    print("cost {}".format(time.time()-start_time))
     
-    from calflops import calculate_flops
-    batch_size = 1
-    input_shape = (batch_size, 3, resolution, resolution)
-    flops, macs, params = calculate_flops(model=vitunetr, 
-                                        input_shape=input_shape,
-                                        output_as_string=True,
-                                        output_precision=4)
-    print("Vitunet FLOPs:%s   MACs:%s   Params:%s \n" %(flops, macs, params))
+    # from calflops import calculate_flops
+    # batch_size = 1
+    # input_shape = (batch_size, 3, resolution, resolution)
+    # flops, macs, params = calculate_flops(model=vitunetr, 
+    #                                     input_shape=input_shape,
+    #                                     output_as_string=True,
+    #                                     output_precision=4)
+    # print("Vitunet FLOPs:%s   MACs:%s   Params:%s \n" %(flops, macs, params))

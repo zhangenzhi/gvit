@@ -2,7 +2,8 @@ import torch
 import torch.nn as nn
 from einops import rearrange
 import torch.nn.functional as F
-
+import sys
+sys.path.append("./")
 from model.vit import ViT
 
 
@@ -153,14 +154,25 @@ class TransUNet(nn.Module):
 if __name__ == '__main__':
     import torch
 
-    transunet = TransUNet(img_dim=128,
+    res = 1024
+    patch = 32
+    transunet = TransUNet(img_dim=res,
                           in_channels=3,
                           out_channels=128,
                           head_num=4,
                           mlp_dim=512,
                           block_num=8,
-                          patch_size=16,
+                          patch_size=patch,
                           class_num=1)
 
     print(sum(p.numel() for p in transunet.parameters()))
-    print(transunet(torch.randn(1, 3, 128, 128)).shape)
+    print(transunet(torch.randn(1, 3, res, res)).shape)
+    
+    from calflops import calculate_flops
+    batch_size = 1
+    input_shape = (batch_size, 3, res, res)
+    flops, macs, params = calculate_flops(model=transunet, 
+                                        input_shape=input_shape,
+                                        output_as_string=True,
+                                        output_precision=4)
+    print("Unetr FLOPs:%s   MACs:%s   Params:%s \n" %(flops, macs, params))
