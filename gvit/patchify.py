@@ -138,24 +138,41 @@ def compress_mix_patches(qdt:QuadTree, img: np.array, to_size:tuple=(8,8,3), tar
         
     return seq_patches, to_size, patch_info
 
+import multiprocessing as mp
+def ppatch(path, output_dir, target_length, sth, resolution, split_value, max_depth, to_size):
+    img = cv.imread(path)
+    img, edge = transform(img, sth=sth, dsize=(resolution, resolution))
+    qdt = QuadTree(domain=edge, max_value=split_value, max_depth = max_depth)
+    seq_patches, patch_size, patch_info = compress_mix_patches(qdt, img, to_size, target_length)
+    seq_img = np.asarray(seq_patches)
+    seq_img = np.reshape(seq_img, [patch_size[0], -1, patch_size[2]])
+    name = Path(path).parts[-2]
+    cv.imwrite(output_dir+"/{}/{}_{}-p.png".format(name, resolution, "qdt"), seq_img)
+    return patch_info
+
+result_list = []
 def paip_patchify(base, split_value:int, max_depth:int, resolution: int, sth:int=3, target_length:int=576, to_size:tuple=(8,8,3)):
     img_path = get_png_path(base=base, resolution=resolution)
     output_dir = base
     os.makedirs(output_dir, exist_ok=True)
     total_patches_info = []
     statical_info = {}
-    for i,p in enumerate(img_path):
-        img = cv.imread(p)
-        img, edge = transform(img, sth=sth, canny=(args.c_low,args.c_high), dsize=(resolution, resolution))
-        qdt = QuadTree(domain=edge, max_value=split_value, max_depth = max_depth)
-        seq_patches, patch_size, patch_info = compress_mix_patches(qdt, img, to_size, target_length)
-        seq_img = np.asarray(seq_patches)
-        seq_img = np.reshape(seq_img, [patch_size[0], -1, patch_size[2]])
-        name = Path(p).parts[-2]
-        cv.imwrite(output_dir+"/{}/{}_{}.png".format(name, resolution, "qdt"), seq_img)
-        total_patches_info.append(patch_info)
-        # statical calculate
-        for key, value in patch_info.items():
+    
+    def log_result(result):
+        result_list.append(result)
+    pool = mp.Pool(8)
+    for p in img_path:
+        pool.apply_async(func=ppatch, 
+                         args=(p, output_dir, target_length, sth, resolution, split_value, max_depth, to_size, ),
+                         callback = log_result)
+ 
+    pool.close()
+    pool.join()
+    
+    total_patches_info = result_list
+    # statical calculate
+    for pi in result_list:
+        for key, value in pi.items():
             if key in statical_info:
                 statical_info[key] += value
             else:
@@ -164,6 +181,33 @@ def paip_patchify(base, split_value:int, max_depth:int, resolution: int, sth:int
     avg_len = plot_patchied_info(statical_info)
     plot_img_patch_dist(total_patches_info)
     print("Avg lenth:{}, resolution:{}, to_size:{}, sp_val:{}, sth:{}".format(avg_len, resolution, to_size[0], split_value, sth))
+
+# def paip_patchify(base, split_value:int, max_depth:int, resolution: int, sth:int=3, target_length:int=576, to_size:tuple=(8,8,3)):
+#     img_path = get_png_path(base=base, resolution=resolution)
+#     output_dir = base
+#     os.makedirs(output_dir, exist_ok=True)
+#     total_patches_info = []
+#     statical_info = {}
+#     for i,p in enumerate(img_path):
+#         img = cv.imread(p)
+#         img, edge = transform(img, sth=sth, dsize=(resolution, resolution))
+#         qdt = QuadTree(domain=edge, max_value=split_value, max_depth = max_depth)
+#         seq_patches, patch_size, patch_info = compress_mix_patches(qdt, img, to_size, target_length)
+#         seq_img = np.asarray(seq_patches)
+#         seq_img = np.reshape(seq_img, [patch_size[0], -1, patch_size[2]])
+#         name = Path(p).parts[-2]
+#         cv.imwrite(output_dir+"/{}/{}_{}.png".format(name, resolution, "qdt"), seq_img)
+#         total_patches_info.append(patch_info)
+#         # statical calculate
+#         for key, value in patch_info.items():
+#             if key in statical_info:
+#                 statical_info[key] += value
+#             else:
+#                 statical_info[key] = value
+                
+#     avg_len = plot_patchied_info(statical_info)
+#     plot_img_patch_dist(total_patches_info)
+#     print("Avg lenth:{}, resolution:{}, to_size:{}, sp_val:{}, sth:{}".format(avg_len, resolution, to_size[0], split_value, sth))
         
 def imagenet_patcher(datapath):
     train_path = os.path.join(datapath, "train")
